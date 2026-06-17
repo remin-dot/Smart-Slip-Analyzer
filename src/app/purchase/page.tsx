@@ -13,14 +13,14 @@ import {
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LogoutButton } from "@/components/auth/logout-button";
-import { SlipUpload } from "@/components/scanner/slip-upload";
+import { PurchaseAdvisor } from "@/components/purchase/purchase-advisor";
 import { getCurrentUser } from "@/lib/auth";
 
-export default async function ScannerPage() {
+export default async function PurchasePage() {
   const user = await getCurrentUser();
 
   if (!user) {
-    redirect("/login?next=/scanner");
+    redirect("/login?next=/purchase");
   }
 
   return (
@@ -39,7 +39,7 @@ export default async function ScannerPage() {
             <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/dashboard">
               <LayoutDashboard size={18} /> Dashboard
             </Link>
-            <Link className="flex items-center gap-3 rounded-lg bg-white/10 px-3 py-3 text-white" href="/scanner">
+            <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/scanner">
               <FileScan size={18} /> Slip Scanner
             </Link>
             <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/transactions">
@@ -54,12 +54,12 @@ export default async function ScannerPage() {
             <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/chat">
               <MessageCircle size={18} /> AI Assistant
             </Link>
-            <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/purchase">
+            <Link className="flex items-center gap-3 rounded-lg bg-white/10 px-3 py-3 text-white" href="/purchase">
               <ShoppingCart size={18} /> Purchase Advisor
             </Link>
-            <a className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/dashboard#analytics">
+            <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/dashboard#analytics">
               <ChartNoAxesCombined size={18} /> Analytics
-            </a>
+            </Link>
             <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/profile">
               <UserRound size={18} /> Profile
             </Link>
@@ -71,29 +71,33 @@ export default async function ScannerPage() {
             </div>
             <p className="mt-3 text-2xl font-black">{user.name}</p>
             <p className="mt-2 text-sm leading-6 text-white/65">{user.email}</p>
+            <div className="mt-3">
+              <LogoutButton />
+            </div>
           </div>
         </aside>
 
         <section className="mx-auto w-full max-w-[1440px] p-5 sm:p-8">
           <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="eyebrow">AI-powered document processing</p>
-              <h1 className="mt-2 text-4xl font-black leading-none sm:text-5xl">Slip Scanner</h1>
-              <p className="mt-3 max-w-xl text-base leading-8 text-muted">
-                Upload a bank transfer slip or receipt. The AI extracts date, time, amount,
-                bank, receiver, and reference number automatically.
+              <p className="eyebrow">Smart purchase decisions</p>
+              <h1 className="mt-2 text-4xl font-black leading-none sm:text-5xl">
+                Purchase Advisor
+              </h1>
+              <p className="mt-3 max-w-lg text-base leading-8 text-muted">
+                Enter any product and price — AI analyzes need vs want, financial impact, budget effects, and goal delays.
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <Link className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-extrabold text-ink" href="/dashboard">
-                Back to dashboard
-              </Link>
-              <LogoutButton />
-            </div>
+            <Link
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-extrabold text-ink hover:bg-slate-50"
+              href="/dashboard"
+            >
+              <LayoutDashboard size={16} /> Back to Dashboard
+            </Link>
           </header>
 
-          <section className="mt-8">
-            <SlipUpload />
+          <section className="mt-6">
+            <PurchaseAdvisor />
           </section>
         </section>
       </div>

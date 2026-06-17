@@ -2,8 +2,12 @@ import {
   ChartNoAxesCombined,
   CircleDollarSign,
   FileScan,
+  Flag,
   LayoutDashboard,
+  MessageCircle,
+  PiggyBank,
   ShieldCheck,
+  ShoppingCart,
   UserRound,
 } from "lucide-react";
 import Link from "next/link";
@@ -41,6 +45,18 @@ export default async function TransactionsPage() {
             <Link className="flex items-center gap-3 rounded-lg bg-white/10 px-3 py-3 text-white" href="/transactions">
               <CircleDollarSign size={18} /> Transactions
             </Link>
+            <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/budgets">
+              <PiggyBank size={18} /> Budgets
+            </Link>
+            <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/goals">
+              <Flag size={18} /> Saving Goals
+            </Link>
+            <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/chat">
+              <MessageCircle size={18} /> AI Assistant
+            </Link>
+            <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/purchase">
+              <ShoppingCart size={18} /> Purchase Advisor
+            </Link>
             <a className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/dashboard#analytics">
               <ChartNoAxesCombined size={18} /> Analytics
             </a>
@@ -61,22 +77,25 @@ export default async function TransactionsPage() {
         <section className="mx-auto w-full max-w-[1440px] p-5 sm:p-8">
           <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="eyebrow">AI-powered expense management</p>
+              <p className="eyebrow">Financial transaction management</p>
               <h1 className="mt-2 text-4xl font-black leading-none sm:text-5xl">Transactions</h1>
               <p className="mt-3 max-w-xl text-base leading-8 text-muted">
-                View all transactions with AI-assigned categories. Click any category to
-                edit it, or let AI classify uncategorized entries.
+                Search, filter, sort, and manage all your transactions.
+                Edit details inline or let AI auto-classify spending categories.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <Link className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-extrabold text-ink" href="/scanner">
-                Scan new slip
+              <Link
+                className="inline-flex items-center gap-2 rounded-lg bg-teal px-5 py-3 text-sm font-extrabold text-white hover:opacity-90"
+                href="/scanner"
+              >
+                <FileScan size={16} /> Scan new slip
               </Link>
               <LogoutButton />
             </div>
           </header>
 
-          <section className="mt-8">
+          <section className="mt-6">
             <TransactionList />
           </section>
         </section>

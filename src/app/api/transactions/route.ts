@@ -4,25 +4,58 @@ import { prisma } from "@/lib/db";
 import { apiError, parseJson, requireUserId } from "@/lib/api";
 import { transactionSchema } from "@/lib/validators";
 
+const VALID_SORT_FIELDS = ["occurredAt", "amount", "merchant", "createdAt"] as const;
+type SortField = (typeof VALID_SORT_FIELDS)[number];
+
 export async function GET(request: NextRequest) {
   const { userId, response } = await requireUserId(request);
   if (response) return response;
 
   const { searchParams } = new URL(request.url);
   const take = Math.min(Number(searchParams.get("take") ?? 25), 100);
-  const categoryId = searchParams.get("categoryId") ?? undefined;
+  const skip = Math.max(Number(searchParams.get("skip") ?? 0), 0);
+  const search = searchParams.get("search")?.trim() ?? "";
+  const categoryId = searchParams.get("categoryId") || undefined;
+  const type = searchParams.get("type") || undefined;
+  const source = searchParams.get("source") || undefined;
+  const from = searchParams.get("from") || undefined;
+  const to = searchParams.get("to") || undefined;
+  const sortBy = searchParams.get("sortBy") as SortField | null;
+  const sortDir = searchParams.get("sortDir") === "asc" ? "asc" : "desc";
 
-  const transactions = await prisma.transaction.findMany({
-    where: {
-      userId,
-      categoryId
-    },
-    include: { category: true },
-    orderBy: { occurredAt: "desc" },
-    take
-  });
+  const where: Prisma.TransactionWhereInput = { userId };
 
-  return NextResponse.json({ transactions });
+  if (categoryId) where.categoryId = categoryId;
+  if (type) where.type = type as Prisma.EnumTransactionTypeFilter;
+  if (source) where.source = source as Prisma.EnumTransactionSourceFilter;
+
+  if (from || to) {
+    where.occurredAt = {};
+    if (from) where.occurredAt.gte = new Date(from);
+    if (to) where.occurredAt.lte = new Date(to + "T23:59:59.999Z");
+  }
+
+  if (search) {
+    where.OR = [
+      { merchant: { contains: search, mode: "insensitive" } },
+      { description: { contains: search, mode: "insensitive" } },
+    ];
+  }
+
+  const orderField = sortBy && VALID_SORT_FIELDS.includes(sortBy) ? sortBy : "occurredAt";
+
+  const [transactions, total] = await Promise.all([
+    prisma.transaction.findMany({
+      where,
+      include: { category: true },
+      orderBy: { [orderField]: sortDir },
+      take,
+      skip,
+    }),
+    prisma.transaction.count({ where }),
+  ]);
+
+  return NextResponse.json({ transactions, total, take, skip });
 }
 
 export async function POST(request: NextRequest) {
