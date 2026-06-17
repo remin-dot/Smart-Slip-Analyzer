@@ -1,0 +1,32 @@
+<svg width="560" height="430" viewBox="0 0 560 430" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Scanned bank slip analysis</title>
+  <desc id="desc">A bank slip with AI scanning markers and extracted financial fields.</desc>
+  <rect width="560" height="430" rx="28" fill="#EFF5F1"/>
+  <rect x="52" y="54" width="272" height="326" rx="18" fill="#FFFFFF" stroke="#D8E1D9" stroke-width="2"/>
+  <rect x="78" y="86" width="86" height="16" rx="8" fill="#102C3A"/>
+  <rect x="78" y="121" width="198" height="10" rx="5" fill="#C9D4CE"/>
+  <rect x="78" y="143" width="148" height="10" rx="5" fill="#DCE4DF"/>
+  <rect x="78" y="184" width="220" height="56" rx="10" fill="#F5F8F5"/>
+  <rect x="96" y="203" width="110" height="9" rx="4.5" fill="#BBC9C1"/>
+  <rect x="96" y="220" width="154" height="9" rx="4.5" fill="#D4DED8"/>
+  <rect x="78" y="270" width="220" height="1.5" fill="#DCE4DF"/>
+  <rect x="78" y="296" width="64" height="10" rx="5" fill="#D4DED8"/>
+  <rect x="218" y="294" width="80" height="14" rx="7" fill="#087F7A"/>
+  <rect x="78" y="326" width="110" height="10" rx="5" fill="#D4DED8"/>
+  <path d="M105 64H76C63.8497 64 54 73.8497 54 86V115" stroke="#087F7A" stroke-width="7" stroke-linecap="round"/>
+  <path d="M271 378H302C314.15 378 324 368.15 324 356V325" stroke="#087F7A" stroke-width="7" stroke-linecap="round"/>
+  <path d="M324 116V86C324 73.8497 314.15 64 302 64H273" stroke="#F5C25B" stroke-width="7" stroke-linecap="round"/>
+  <path d="M54 326V356C54 368.15 63.8497 378 76 378H106" stroke="#F5C25B" stroke-width="7" stroke-linecap="round"/>
+  <rect x="346" y="104" width="160" height="74" rx="14" fill="#102C3A"/>
+  <text x="368" y="135" fill="#EAF3F0" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700">Amount</text>
+  <text x="368" y="160" fill="#FFFFFF" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="800">$86.35</text>
+  <rect x="360" y="206" width="128" height="44" rx="12" fill="#FFFFFF" stroke="#D8E1D9" stroke-width="2"/>
+  <circle cx="382" cy="228" r="9" fill="#D85C46"/>
+  <text x="400" y="233" fill="#14213D" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700">Groceries</text>
+  <rect x="360" y="270" width="128" height="44" rx="12" fill="#FFFFFF" stroke="#D8E1D9" stroke-width="2"/>
+  <circle cx="382" cy="292" r="9" fill="#087F7A"/>
+  <text x="400" y="297" fill="#14213D" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700">95% read</text>
+  <path d="M324 180C352 180 348 141 346 141" stroke="#087F7A" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M324 214C346 214 345 228 360 228" stroke="#D85C46" stroke-width="3" stroke-dasharray="8 8"/>
+  <path d="M324 248C346 248 344 292 360 292" stroke="#2855A3" stroke-width="3" stroke-dasharray="8 8"/>
+</svg>

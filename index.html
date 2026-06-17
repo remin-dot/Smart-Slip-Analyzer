@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Slip Analyzer</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Main navigation">
+        <a class="brand" href="#" aria-label="Smart Slip Analyzer home">
+          <span class="brand-mark">S</span>
+          <span>
+            <strong>Smart Slip</strong>
+            <small>Analyzer</small>
+          </span>
+        </a>
+
+        <nav class="nav-list">
+          <a class="active" href="#dashboard">
+            <span>Dashboard</span>
+          </a>
+          <a href="#scanner">
+            <span>Slip Scanner</span>
+          </a>
+          <a href="#analytics">
+            <span>Analytics</span>
+          </a>
+          <a href="#advice">
+            <span>AI Advice</span>
+          </a>
+        </nav>
+
+        <section class="account-card" aria-label="AI confidence">
+          <p>AI Confidence</p>
+          <strong id="confidenceScore">92%</strong>
+          <div class="meter">
+            <span style="width: 92%"></span>
+          </div>
+        </section>
+      </aside>
+
+      <main>
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Financial assistant</p>
+            <h1>Smart Slip Analyzer</h1>
+          </div>
+          <div class="topbar-actions">
+            <span class="date-chip">June 2026</span>
+            <button class="profile-button" type="button">JD</button>
+          </div>
+        </header>
+
+        <section class="hero-panel" id="dashboard">
+          <div class="hero-copy">
+            <p class="eyebrow">Upload slip -> AI reads data -> smarter money decisions</p>
+            <h2>Your spending story, decoded from bank slips.</h2>
+            <p>
+              Scan transfers, receipts, and bank slips to track cash flow, uncover behavior patterns,
+              and receive practical AI recommendations.
+            </p>
+            <div class="hero-actions">
+              <a class="primary-button" href="#scanner">Analyze a slip</a>
+              <button class="secondary-button" id="runDemo" type="button">Run demo scan</button>
+            </div>
+          </div>
+          <img
+            class="slip-visual"
+            src="assets/slip-scan.svg"
+            alt="Illustration of a scanned bank slip with extracted financial fields"
+          />
+        </section>
+
+        <section class="metric-grid" aria-label="Financial summary">
+          <article class="metric-card">
+            <span>Total Balance</span>
+            <strong id="balanceMetric">$8,420</strong>
+            <small class="good">+12.4% this month</small>
+          </article>
+          <article class="metric-card">
+            <span>Monthly Income</span>
+            <strong id="incomeMetric">$5,700</strong>
+            <small class="good">3 deposits detected</small>
+          </article>
+          <article class="metric-card">
+            <span>Expenses</span>
+            <strong id="expenseMetric">$2,840</strong>
+            <small class="warn">Dining is above target</small>
+          </article>
+          <article class="metric-card">
+            <span>Savings Rate</span>
+            <strong id="savingMetric">31%</strong>
+            <small class="good">Goal: 25%</small>
+          </article>
+        </section>
+
+        <section class="workspace-grid">
+          <article class="scanner-panel" id="scanner">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">AI slip scanner</p>
+                <h3>Upload bank slip</h3>
+              </div>
+              <span class="status-pill" id="scanStatus">Ready</span>
+            </div>
+
+            <label class="drop-zone" id="dropZone" for="slipInput">
+              <input id="slipInput" type="file" accept="image/*,.pdf" />
+              <span class="upload-icon">+</span>
+              <strong>Drop a slip or browse files</strong>
+              <small>Supports JPG, PNG, and PDF bank slips</small>
+            </label>
+
+            <div class="extraction-card">
+              <div>
+                <span>Merchant</span>
+                <strong id="merchantValue">Bean & Budget Cafe</strong>
+              </div>
+              <div>
+                <span>Amount</span>
+                <strong id="amountValue">$18.60</strong>
+              </div>
+              <div>
+                <span>Category</span>
+                <strong id="categoryValue">Food & Dining</strong>
+              </div>
+              <div>
+                <span>Date</span>
+                <strong id="dateValue">17 Jun 2026</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="analytics-panel" id="analytics">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Spending behavior</p>
+                <h3>Category analytics</h3>
+              </div>
+              <select id="periodSelect" aria-label="Select analytics period">
+                <option>This month</option>
+                <option>Last month</option>
+                <option>Last 90 days</option>
+              </select>
+            </div>
+
+            <div class="category-list" id="categoryList"></div>
+          </article>
+        </section>
+
+        <section class="insight-grid">
+          <article class="transactions-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Recent movement</p>
+                <h3>Detected transactions</h3>
+              </div>
+              <button class="text-button" type="button">Export</button>
+            </div>
+            <div class="transaction-list" id="transactionList"></div>
+          </article>
+
+          <article class="advice-panel" id="advice">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">AI recommendations</p>
+                <h3>Next best actions</h3>
+              </div>
+            </div>
+            <div class="advice-list" id="adviceList"></div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
