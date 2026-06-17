@@ -7,9 +7,9 @@ import {
   LayoutDashboard,
   MessageCircle,
   PiggyBank,
+  Repeat,
   ShieldCheck,
   ShoppingCart,
-  Repeat,
   Star,
   TrendingUp,
   UserRound,
@@ -17,14 +17,14 @@ import {
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LogoutButton } from "@/components/auth/logout-button";
-import { PurchaseAdvisor } from "@/components/purchase/purchase-advisor";
+import { SubscriptionTracker } from "@/components/subscriptions/subscription-tracker";
 import { getCurrentUser } from "@/lib/auth";
 
-export default async function PurchasePage() {
+export default async function SubscriptionsPage() {
   const user = await getCurrentUser();
 
   if (!user) {
-    redirect("/login?next=/purchase");
+    redirect("/login?next=/subscriptions");
   }
 
   return (
@@ -58,10 +58,10 @@ export default async function PurchasePage() {
             <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/chat">
               <MessageCircle size={18} /> AI Assistant
             </Link>
-            <Link className="flex items-center gap-3 rounded-lg bg-white/10 px-3 py-3 text-white" href="/purchase">
+            <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/purchase">
               <ShoppingCart size={18} /> Purchase Advisor
             </Link>
-            <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/subscriptions">
+            <Link className="flex items-center gap-3 rounded-lg bg-white/10 px-3 py-3 text-white" href="/subscriptions">
               <Repeat size={18} /> Subscriptions
             </Link>
             <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/predictions">
@@ -96,12 +96,12 @@ export default async function PurchasePage() {
         <section className="mx-auto w-full max-w-[1440px] p-5 sm:p-8">
           <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="eyebrow">Smart purchase decisions</p>
+              <p className="eyebrow">Subscription detection</p>
               <h1 className="mt-2 text-4xl font-black leading-none sm:text-5xl">
-                Purchase Advisor
+                Subscriptions
               </h1>
               <p className="mt-3 max-w-lg text-base leading-8 text-muted">
-                Enter any product and price — AI analyzes need vs want, financial impact, budget effects, and goal delays.
+                AI detects recurring payments from your transactions — see monthly costs, spot unused subscriptions, and get cancellation recommendations.
               </p>
             </div>
             <Link
@@ -113,7 +113,7 @@ export default async function PurchasePage() {
           </header>
 
           <section className="mt-6">
-            <PurchaseAdvisor />
+            <SubscriptionTracker />
           </section>
         </section>
       </div>

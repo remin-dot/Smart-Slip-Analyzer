@@ -63,6 +63,8 @@ model User {
   budgets             Budget[]
   goals               FinancialGoal[]
   aiReports           AiReport[]
+  wealthItems         WealthItem[]
+  netWorthSnapshots   NetWorthSnapshot[]
 
   @@index([email])
   @@index([googleId])
@@ -147,6 +149,42 @@ model FinancialGoal {
   user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, status])
+}
+
+enum WealthItemType {
+  CASH
+  INVESTMENT
+  PROPERTY
+  DEBT
+  LOAN
+}
+
+model WealthItem {
+  id          String         @id @default(cuid())
+  userId      String
+  type        WealthItemType
+  name        String
+  value       Decimal        @db.Decimal(14, 2)
+  currency    String         @default("USD")
+  note        String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+}
+
+model NetWorthSnapshot {
+  id         String   @id @default(cuid())
+  userId     String
+  assets     Decimal  @db.Decimal(14, 2)
+  liabilities Decimal @db.Decimal(14, 2)
+  netWorth   Decimal  @db.Decimal(14, 2)
+  currency   String   @default("USD")
+  snapshotAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, snapshotAt])
 }
 
 model AiReport {

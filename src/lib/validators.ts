@@ -66,6 +66,14 @@ export const financialGoalSchema = z.object({
   aiStrategy: z.record(z.unknown()).optional().nullable()
 });
 
+export const wealthItemSchema = z.object({
+  type: z.enum(["CASH", "INVESTMENT", "PROPERTY", "DEBT", "LOAN"]),
+  name: z.string().min(1).max(120),
+  value: z.coerce.number().min(0),
+  currency: z.string().length(3).default("USD"),
+  note: z.string().max(500).optional().nullable(),
+});
+
 export const aiReportRequestSchema = z.object({
   transactionId: z.string().cuid().optional(),
   type: z.enum([

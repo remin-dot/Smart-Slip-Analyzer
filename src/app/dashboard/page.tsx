@@ -3,11 +3,15 @@ import {
   CircleDollarSign,
   FileScan,
   Flag,
+  Landmark,
   LayoutDashboard,
   MessageCircle,
   PiggyBank,
   ShieldCheck,
   ShoppingCart,
+  Repeat,
+  Star,
+  TrendingUp,
   Upload,
   UserRound,
 } from "lucide-react";
@@ -57,6 +61,18 @@ export default async function DashboardPage() {
             </Link>
             <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/purchase">
               <ShoppingCart size={18} /> Purchase Advisor
+            </Link>
+            <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/subscriptions">
+              <Repeat size={18} /> Subscriptions
+            </Link>
+            <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/predictions">
+              <TrendingUp size={18} /> Predictions
+            </Link>
+            <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/wealth">
+              <Landmark size={18} /> Wealth
+            </Link>
+            <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/achievements">
+              <Star size={18} /> Achievements
             </Link>
             <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/dashboard#analytics">
               <ChartNoAxesCombined size={18} /> Analytics

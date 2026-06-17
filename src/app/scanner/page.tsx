@@ -3,11 +3,15 @@ import {
   CircleDollarSign,
   FileScan,
   Flag,
+  Landmark,
   LayoutDashboard,
   MessageCircle,
   PiggyBank,
   ShieldCheck,
   ShoppingCart,
+  Repeat,
+  Star,
+  TrendingUp,
   UserRound,
 } from "lucide-react";
 import Link from "next/link";
@@ -57,9 +61,21 @@ export default async function ScannerPage() {
             <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/purchase">
               <ShoppingCart size={18} /> Purchase Advisor
             </Link>
-            <a className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/dashboard#analytics">
+            <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/subscriptions">
+              <Repeat size={18} /> Subscriptions
+            </Link>
+            <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/predictions">
+              <TrendingUp size={18} /> Predictions
+            </Link>
+            <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/wealth">
+              <Landmark size={18} /> Wealth
+            </Link>
+            <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/achievements">
+              <Star size={18} /> Achievements
+            </Link>
+            <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/dashboard#analytics">
               <ChartNoAxesCombined size={18} /> Analytics
-            </a>
+            </Link>
             <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/profile">
               <UserRound size={18} /> Profile
             </Link>
