@@ -60,9 +60,12 @@ export default async function DashboardPage() {
             <Link className="flex items-center gap-3 rounded-lg bg-white/10 px-3 py-3 text-white" href="/dashboard">
               <LayoutDashboard size={18} /> Dashboard
             </Link>
-            <a className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="#scanner">
+            <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/scanner">
               <FileScan size={18} /> Slip Scanner
-            </a>
+            </Link>
+            <Link className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="/transactions">
+              <CircleDollarSign size={18} /> Transactions
+            </Link>
             <a className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 hover:text-white" href="#analytics">
               <ChartNoAxesCombined size={18} /> Analytics
             </a>
@@ -105,9 +108,9 @@ export default async function DashboardPage() {
                 financial preferences, and AI reports are tied to your user profile.
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
-                <a className="inline-flex items-center gap-2 rounded-lg bg-teal px-5 py-3 font-extrabold text-white" href="#scanner">
+                <Link className="inline-flex items-center gap-2 rounded-lg bg-teal px-5 py-3 font-extrabold text-white" href="/scanner">
                   <Upload size={18} /> Analyze slip
-                </a>
+                </Link>
                 <Link className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-5 py-3 font-extrabold text-ink" href="/profile">
                   User profile <ArrowUpRight size={18} />
                 </Link>
