@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { CURRENCIES } from "@/lib/format";
 
 type ProfileFormProps = {
   user: {
@@ -74,7 +75,13 @@ export function ProfileForm({ user }: ProfileFormProps) {
         </label>
         <label className="grid gap-2 text-sm font-extrabold">
           Currency
-          <input className="rounded-lg border border-slate-200 px-4 py-3 font-semibold uppercase outline-none focus:border-teal" name="currency" maxLength={3} minLength={3} defaultValue={user.currency} />
+          <select className="rounded-lg border border-slate-200 px-4 py-3 font-semibold outline-none focus:border-teal" name="currency" defaultValue={user.currency}>
+            {CURRENCIES.map((c) => (
+              <option key={c.code} value={c.code}>
+                {c.symbol} {c.code} — {c.label}
+              </option>
+            ))}
+          </select>
         </label>
       </div>
       <label className="grid gap-2 text-sm font-extrabold">

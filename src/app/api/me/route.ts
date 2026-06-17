@@ -19,7 +19,7 @@ export async function PATCH(request: NextRequest) {
     const { userId, response } = await requireUserId(request);
     if (response) return response;
 
-    const data = await parseJson(request, profileSchema);
+    const data = await parseJson(request, profileSchema.partial());
     const user = await prisma.user.update({
       where: { id: userId },
       data,

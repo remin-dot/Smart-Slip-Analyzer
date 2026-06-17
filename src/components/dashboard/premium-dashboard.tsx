@@ -18,6 +18,7 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
+import { formatCurrency } from "@/lib/format";
 
 /* ── types ────────────────────────────────────────────────────── */
 
@@ -124,6 +125,7 @@ export function PremiumDashboard() {
 
   const s = dash.summary;
   const cur = s.currency;
+  const money = (n: number) => formatCurrency(n, cur);
 
   return (
     <div className="grid gap-5">
@@ -131,8 +133,7 @@ export function PremiumDashboard() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <GlassKpi
           label="Total Balance"
-          value={fmt2(s.balance)}
-          currency={cur}
+          value={money(s.balance)}
           delta={s.monthBalance}
           deltaLabel="this month"
           icon={<Wallet size={20} />}
@@ -140,15 +141,13 @@ export function PremiumDashboard() {
         />
         <GlassKpi
           label="Monthly Income"
-          value={fmt2(s.monthIncome)}
-          currency={cur}
+          value={money(s.monthIncome)}
           icon={<TrendingUp size={20} />}
           accent="emerald"
         />
         <GlassKpi
           label="Monthly Expenses"
-          value={fmt2(s.monthExpense)}
-          currency={cur}
+          value={money(s.monthExpense)}
           icon={<ArrowDownRight size={20} />}
           accent="rose"
         />
@@ -237,7 +236,7 @@ export function PremiumDashboard() {
               <p className="text-sm font-bold text-white">Smart Summary</p>
               <p className="mt-1 text-xs leading-5 text-slate-400">
                 {s.monthIncome > 0
-                  ? `You've earned ${fmt(s.monthIncome)} ${cur} and spent ${fmt(s.monthExpense)} ${cur} this month. ${s.savingRate >= 20 ? "Great saving discipline!" : "Consider cutting expenses to boost savings."}`
+                  ? `You've earned ${money(s.monthIncome)} and spent ${money(s.monthExpense)} this month. ${s.savingRate >= 20 ? "Great saving discipline!" : "Consider cutting expenses to boost savings."}`
                   : "Start tracking income to get personalized insights."}
               </p>
             </div>
@@ -251,7 +250,7 @@ export function PremiumDashboard() {
                     <span className="h-2 w-2 rounded-full" style={{ background: c.color }} />
                     <span className="text-xs font-medium text-slate-300">{c.name}</span>
                   </div>
-                  <span className="text-xs font-bold text-white">{fmt(c.amount)} {cur}</span>
+                  <span className="text-xs font-bold text-white">{money(c.amount)}</span>
                 </div>
               ))}
             </div>
@@ -311,9 +310,9 @@ export function PremiumDashboard() {
           </div>
           <div className="text-right">
             <p className="text-xl font-black text-white">
-              {fmt2(dash.spendingTrend.reduce((sum, d) => sum + d.amount, 0))}
+              {money(dash.spendingTrend.reduce((sum, d) => sum + d.amount, 0))}
             </p>
-            <p className="text-xs text-slate-400">{cur} total</p>
+            <p className="text-xs text-slate-400">total</p>
           </div>
         </div>
         <div className="mt-4">
@@ -350,8 +349,8 @@ export function PremiumDashboard() {
                     />
                   </div>
                   <div className="mt-1.5 flex justify-between text-[10px] text-slate-500">
-                    <span>{fmt(g.currentAmount)} {cur}</span>
-                    <span>{fmt(g.targetAmount)} {cur}</span>
+                    <span>{money(g.currentAmount)}</span>
+                    <span>{money(g.targetAmount)}</span>
                   </div>
                 </div>
               ))}
@@ -388,7 +387,7 @@ export function PremiumDashboard() {
                       </p>
                     </div>
                     <span className={`shrink-0 text-sm font-black ${isIncome ? "text-emerald-400" : "text-white"}`}>
-                      {isIncome ? "+" : "-"}{fmt2(tx.amount)}
+                      {isIncome ? "+" : "-"}{money(tx.amount)}
                     </span>
                   </div>
                 );
@@ -404,7 +403,7 @@ export function PremiumDashboard() {
       <div className="grid gap-4 sm:grid-cols-3">
         <MiniStat label="Total Transactions" value={String(s.txCount)} icon={<Zap size={16} />} />
         <MiniStat label="This Month" value={String(s.monthTxCount)} icon={<Target size={16} />} />
-        <MiniStat label="Saving Goal" value={`${fmt(s.profileSavingGoal)} ${cur}`} icon={<ShieldCheck size={16} />} />
+        <MiniStat label="Saving Goal" value={money(s.profileSavingGoal)} icon={<ShieldCheck size={16} />} />
       </div>
     </div>
   );
