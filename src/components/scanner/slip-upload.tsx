@@ -11,6 +11,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 type ProcessingStatus = "idle" | "uploading" | "extracting" | "saving" | "done" | "error";
 
@@ -52,16 +53,17 @@ type ExtractionResult = {
 const ACCEPT = ".jpg,.jpeg,.png,.pdf";
 const MAX_SIZE = 10 * 1024 * 1024;
 
-const STATUS_LABELS: Record<ProcessingStatus, string> = {
-  idle: "Ready to scan",
-  uploading: "Uploading file...",
-  extracting: "AI is reading your slip...",
-  saving: "Saving transaction...",
-  done: "Extraction complete",
-  error: "Something went wrong",
+const STATUS_LABEL_KEYS: Record<ProcessingStatus, string> = {
+  idle: "scan.statusIdle",
+  uploading: "scan.statusUploading",
+  extracting: "scan.statusExtracting",
+  saving: "scan.statusSaving",
+  done: "scan.statusDone",
+  error: "scan.statusError",
 };
 
 export function SlipUpload() {
+  const { t } = useI18n();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [status, setStatus] = useState<ProcessingStatus>("idle");
@@ -80,13 +82,13 @@ export function SlipUpload() {
 
   const handleFile = useCallback((f: File) => {
     if (f.size > MAX_SIZE) {
-      setError("File too large. Maximum size is 10 MB.");
+      setError(t("scan.fileTooLarge"));
       return;
     }
 
     const validTypes = ["image/jpeg", "image/png", "application/pdf"];
     if (!validTypes.includes(f.type)) {
-      setError("Unsupported file. Use JPG, PNG, or PDF.");
+      setError(t("scan.unsupported"));
       return;
     }
 
@@ -102,7 +104,7 @@ export function SlipUpload() {
     } else {
       setPreview(null);
     }
-  }, []);
+  }, [t]);
 
   const onDrop = useCallback(
     (e: React.DragEvent) => {
@@ -141,7 +143,7 @@ export function SlipUpload() {
 
       if (!res.ok) {
         const body = await res.json().catch(() => null);
-        throw new Error(body?.error ?? `Server error (${res.status})`);
+        throw new Error(body?.error ?? t("scan.serverError", { code: res.status }));
       }
 
       setStatus("saving");
@@ -150,10 +152,10 @@ export function SlipUpload() {
       setResult(data);
       setStatus("done");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to process slip.");
+      setError(err instanceof Error ? err.message : t("scan.failed"));
       setStatus("error");
     }
-  }, [file]);
+  }, [file, t]);
 
   const isProcessing = status === "uploading" || status === "extracting" || status === "saving";
 
@@ -189,7 +191,7 @@ export function SlipUpload() {
           {preview ? (
             <div className="grid gap-4">
               <img
-                alt="Slip preview"
+                alt={t("scan.previewAlt")}
                 className="mx-auto max-h-[240px] rounded-lg object-contain shadow-sm"
                 src={preview}
               />
@@ -202,7 +204,7 @@ export function SlipUpload() {
               </div>
               <p className="font-black">{file.name}</p>
               <p className="text-sm text-muted">
-                {(file.size / 1024).toFixed(0)} KB - PDF document
+                {t("scan.pdfDoc", { kb: (file.size / 1024).toFixed(0) })}
               </p>
             </div>
           ) : (
@@ -211,9 +213,9 @@ export function SlipUpload() {
                 <Upload size={28} />
               </div>
               <div>
-                <p className="font-black">Drop a bank slip or receipt</p>
+                <p className="font-black">{t("scan.dropTitle")}</p>
                 <p className="mt-1 text-sm text-muted">
-                  Supports JPG, PNG, and PDF up to 10 MB
+                  {t("scan.dropSub")}
                 </p>
               </div>
               <button
@@ -221,7 +223,7 @@ export function SlipUpload() {
                 onClick={() => inputRef.current?.click()}
                 type="button"
               >
-                Browse files
+                {t("scan.browse")}
               </button>
             </div>
           )}
@@ -238,7 +240,7 @@ export function SlipUpload() {
         {/* Status bar */}
         <div className="flex items-center gap-3 rounded-lg bg-slate-50 px-4 py-3">
           <StatusIcon status={status} />
-          <span className="text-sm font-bold">{STATUS_LABELS[status]}</span>
+          <span className="text-sm font-bold">{t(STATUS_LABEL_KEYS[status])}</span>
           {isProcessing && (
             <div className="ml-auto h-1.5 w-24 overflow-hidden rounded-full bg-slate-200">
               <div className="h-full animate-pulse rounded-full bg-teal" style={{ width: statusProgress(status) }} />
@@ -264,10 +266,10 @@ export function SlipUpload() {
             {isProcessing ? (
               <span className="inline-flex items-center gap-2">
                 <Loader2 className="animate-spin" size={18} />
-                Processing...
+                {t("scan.processing")}
               </span>
             ) : (
-              "Scan & Extract"
+              t("scan.scanExtract")
             )}
           </button>
           {(status === "done" || status === "error") && (
@@ -285,28 +287,28 @@ export function SlipUpload() {
       {/* Results panel */}
       <div className="grid gap-4">
         <div className="panel p-5">
-          <p className="eyebrow">Extraction results</p>
-          <h3 className="mt-1 text-xl font-black">Transaction details</h3>
+          <p className="eyebrow">{t("scan.extractionResults")}</p>
+          <h3 className="mt-1 text-xl font-black">{t("scan.txDetails")}</h3>
 
           {result ? (
             <div className="mt-5 grid gap-3">
-              <ResultRow label="Date" value={result.extraction.date} />
-              <ResultRow label="Time" value={result.extraction.time} />
+              <ResultRow label={t("scan.date")} value={result.extraction.date} />
+              <ResultRow label={t("scan.time")} value={result.extraction.time} />
               <ResultRow
-                label="Amount"
+                label={t("scan.amount")}
                 value={result.extraction.amount?.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
               />
-              <ResultRow label="Bank" value={result.extraction.bank} />
-              <ResultRow label="Receiver" value={result.extraction.receiver} />
-              <ResultRow label="Reference" value={result.extraction.referenceNumber} />
-              <ResultRow label="Type" value={result.extraction.transactionType} />
+              <ResultRow label={t("scan.bank")} value={result.extraction.bank} />
+              <ResultRow label={t("scan.receiver")} value={result.extraction.receiver} />
+              <ResultRow label={t("scan.reference")} value={result.extraction.referenceNumber} />
+              <ResultRow label={t("scan.type")} value={result.extraction.transactionType} />
 
               {result.classification && (
                 <div className="mt-2 rounded-lg border border-teal/20 bg-teal/5 p-4">
-                  <p className="text-xs font-extrabold uppercase tracking-normal text-teal">AI Classification</p>
+                  <p className="text-xs font-extrabold uppercase tracking-normal text-teal">{t("scan.aiClassification")}</p>
                   <div className="mt-3 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span
@@ -324,21 +326,21 @@ export function SlipUpload() {
               )}
 
               <div className="mt-2 flex items-center justify-between rounded-lg bg-teal/10 px-4 py-3">
-                <span className="text-sm font-bold text-teal">Extraction Confidence</span>
+                <span className="text-sm font-bold text-teal">{t("scan.extractionConfidence")}</span>
                 <span className="font-black text-teal">
                   {(result.extraction.confidence * 100).toFixed(0)}%
                 </span>
               </div>
 
               <div className="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-3">
-                <span className="text-sm font-bold text-muted">Model</span>
+                <span className="text-sm font-bold text-muted">{t("scan.model")}</span>
                 <span className="font-black">{result.extraction.modelName}</span>
               </div>
 
               {result.transaction && (
                 <div className="mt-3 rounded-lg border border-mint/30 bg-mint/10 px-4 py-3">
                   <p className="flex items-center gap-2 text-sm font-bold text-mint">
-                    <CheckCircle2 size={16} /> Transaction saved
+                    <CheckCircle2 size={16} /> {t("scan.txSaved")}
                   </p>
                   <p className="mt-1 text-sm text-muted">
                     {result.transaction.merchant} - {result.transaction.type}
@@ -349,10 +351,10 @@ export function SlipUpload() {
               {!result.transaction && result.extraction.amount === null && (
                 <div className="mt-3 rounded-lg border border-amber/30 bg-amber/10 px-4 py-3">
                   <p className="text-sm font-bold text-amber">
-                    Could not detect an amount — transaction was not saved.
+                    {t("scan.noAmount")}
                   </p>
                   <p className="mt-1 text-sm text-muted">
-                    Try a clearer image or different file format.
+                    {t("scan.noAmountSub")}
                   </p>
                 </div>
               )}
@@ -362,7 +364,7 @@ export function SlipUpload() {
               <div>
                 <ImageIcon size={32} className="mx-auto text-slate-300" />
                 <p className="mt-3 text-sm font-bold text-muted">
-                  Upload and scan a slip to see extracted data here.
+                  {t("scan.emptyHint")}
                 </p>
               </div>
             </div>

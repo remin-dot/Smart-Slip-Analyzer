@@ -10,6 +10,7 @@ import {
   TrendingDown,
   XCircle,
 } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 type Subscription = {
   merchant: string;
@@ -41,10 +42,11 @@ type Data = {
   currency: string;
 };
 
-const FREQ_LABEL: Record<string, string> = { monthly: "Monthly", quarterly: "Quarterly", yearly: "Yearly" };
+const FREQ_LABEL_KEY: Record<string, string> = { monthly: "sub.freqMonthly", quarterly: "sub.freqQuarterly", yearly: "sub.freqYearly" };
 const FREQ_COLOR: Record<string, string> = { monthly: "#087f7a", quarterly: "#2855a3", yearly: "#cf8b21" };
 
 export function SubscriptionTracker() {
+  const { t } = useI18n();
   const [data, setData] = useState<Data | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -57,7 +59,7 @@ export function SubscriptionTracker() {
       if (!res.ok) throw new Error("Failed to load");
       setData(await res.json());
     } catch {
-      setError("Could not load subscription data.");
+      setError("__LOAD_ERROR__");
     } finally {
       setLoading(false);
     }
@@ -69,7 +71,7 @@ export function SubscriptionTracker() {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-muted">
         <Loader2 className="animate-spin" size={32} />
-        <p className="mt-3 text-sm font-bold">Analyzing recurring payments…</p>
+        <p className="mt-3 text-sm font-bold">{t("sub.analyzing")}</p>
       </div>
     );
   }
@@ -77,9 +79,9 @@ export function SubscriptionTracker() {
   if (error) {
     return (
       <div className="panel p-6 text-center">
-        <p className="text-coral font-bold">{error}</p>
+        <p className="text-coral font-bold">{t("sub.loadError")}</p>
         <button onClick={load} className="mt-3 text-sm font-bold text-teal hover:underline">
-          Try again
+          {t("sub.tryAgain")}
         </button>
       </div>
     );
@@ -94,30 +96,30 @@ export function SubscriptionTracker() {
       {/* KPI cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          label="Monthly Cost"
+          label={t("sub.monthlyCost")}
           value={`${fmt(summary.totalMonthly)} ${currency}`}
-          sub={`${summary.activeCount + summary.unusedCount} subscriptions detected`}
+          sub={t("sub.subsDetected", { n: summary.activeCount + summary.unusedCount })}
           icon={<CreditCard size={18} />}
           color="#087f7a"
         />
         <KpiCard
-          label="Yearly Cost"
+          label={t("sub.yearlyCost")}
           value={`${fmt(summary.totalYearly)} ${currency}`}
-          sub={`${summary.incomePercent}% of income`}
+          sub={t("sub.ofIncome", { pct: summary.incomePercent })}
           icon={<Calendar size={18} />}
           color="#2855a3"
         />
         <KpiCard
-          label="Possibly Unused"
+          label={t("sub.possiblyUnused")}
           value={`${summary.unusedCount}`}
-          sub={summary.unusedCount > 0 ? `~${fmt(summary.unusedMonthly)} ${currency}/mo saveable` : "All active"}
+          sub={summary.unusedCount > 0 ? t("sub.saveable", { amount: fmt(summary.unusedMonthly), cur: currency }) : t("sub.allActive")}
           icon={<AlertTriangle size={18} />}
           color={summary.unusedCount > 0 ? "#d85c46" : "#20875a"}
         />
         <KpiCard
-          label="Active"
+          label={t("sub.active")}
           value={`${summary.activeCount}`}
-          sub="Currently recurring"
+          sub={t("sub.currentlyRecurring")}
           icon={<RefreshCw size={18} />}
           color="#20875a"
         />
@@ -126,8 +128,8 @@ export function SubscriptionTracker() {
       {/* Donut chart */}
       {subscriptions.length > 0 && (
         <div className="panel p-5">
-          <p className="eyebrow">Cost breakdown</p>
-          <h3 className="mt-1 text-lg font-black text-ink">Subscription Share</h3>
+          <p className="eyebrow">{t("sub.costBreakdown")}</p>
+          <h3 className="mt-1 text-lg font-black text-ink">{t("sub.subscriptionShare")}</h3>
           <div className="mt-4 flex flex-col items-center gap-6 sm:flex-row sm:justify-center">
             <SubscriptionDonut subscriptions={subscriptions} totalMonthly={summary.totalMonthly} currency={currency} />
             <div className="grid gap-2 text-sm">
@@ -150,8 +152,8 @@ export function SubscriptionTracker() {
       {subscriptions.length > 0 ? (
         <div className="panel divide-y">
           <div className="p-5">
-            <p className="eyebrow">Detected subscriptions</p>
-            <h3 className="mt-1 text-lg font-black text-ink">Recurring Payments</h3>
+            <p className="eyebrow">{t("sub.detectedSubs")}</p>
+            <h3 className="mt-1 text-lg font-black text-ink">{t("sub.recurringPayments")}</h3>
           </div>
           {subscriptions.map((sub, i) => (
             <div key={sub.merchant + sub.amount + i} className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
@@ -166,11 +168,11 @@ export function SubscriptionTracker() {
                   <div className="flex items-center gap-2">
                     <p className="font-extrabold text-ink">{sub.merchant}</p>
                     {sub.status === "possibly_unused" && (
-                      <span className="rounded bg-coral/10 px-2 py-0.5 text-xs font-bold text-coral">Possibly unused</span>
+                      <span className="rounded bg-coral/10 px-2 py-0.5 text-xs font-bold text-coral">{t("sub.possiblyUnusedBadge")}</span>
                     )}
                   </div>
                   <p className="mt-0.5 text-sm text-muted">
-                    {FREQ_LABEL[sub.frequency]} · {sub.occurrences} payments · Last: {new Date(sub.lastPaid).toLocaleDateString()}
+                    {t("sub.metaLine", { freq: t(FREQ_LABEL_KEY[sub.frequency]), count: sub.occurrences, date: new Date(sub.lastPaid).toLocaleDateString() })}
                   </p>
                   {sub.description && (
                     <p className="mt-0.5 text-xs text-muted">{sub.description}</p>
@@ -182,14 +184,14 @@ export function SubscriptionTracker() {
                 <div>
                   <p className="text-lg font-black text-ink">{fmt(sub.amount)} <span className="text-sm text-muted">{currency}</span></p>
                   <p className="text-xs text-muted">
-                    {sub.frequency !== "monthly" && `≈${fmt(sub.monthlyEquivalent)} ${currency}/mo · `}
-                    {fmt(sub.yearlyEquivalent)} {currency}/yr
+                    {sub.frequency !== "monthly" && t("sub.approxMo", { amount: fmt(sub.monthlyEquivalent), cur: currency })}
+                    {t("sub.perYr", { amount: fmt(sub.yearlyEquivalent), cur: currency })}
                   </p>
                 </div>
                 <div
                   className="grid h-8 w-8 place-items-center rounded-full"
                   style={{ background: sub.confidence >= 0.7 ? "#e8f5e9" : "#fff3e0" }}
-                  title={`${Math.round(sub.confidence * 100)}% confidence`}
+                  title={t("sub.confidence", { pct: Math.round(sub.confidence * 100) })}
                 >
                   <span className="text-xs font-bold" style={{ color: sub.confidence >= 0.7 ? "#20875a" : "#cf8b21" }}>
                     {Math.round(sub.confidence * 100)}
@@ -202,9 +204,9 @@ export function SubscriptionTracker() {
       ) : (
         <div className="panel flex flex-col items-center justify-center p-10 text-center">
           <XCircle size={40} className="text-muted/40" />
-          <p className="mt-3 text-lg font-black text-ink">No Subscriptions Detected</p>
+          <p className="mt-3 text-lg font-black text-ink">{t("sub.noSubs")}</p>
           <p className="mt-1 max-w-md text-sm text-muted">
-            Keep adding transactions and we&apos;ll automatically detect recurring payments like Netflix, Spotify, cloud storage, and more.
+            {t("sub.noSubsBody")}
           </p>
         </div>
       )}
@@ -214,9 +216,9 @@ export function SubscriptionTracker() {
         <div className="panel p-5">
           <div className="flex items-center gap-2">
             <TrendingDown size={18} className="text-teal" />
-            <p className="eyebrow">AI recommendations</p>
+            <p className="eyebrow">{t("sub.aiRecommendations")}</p>
           </div>
-          <h3 className="mt-1 text-lg font-black text-ink">Saving Opportunities</h3>
+          <h3 className="mt-1 text-lg font-black text-ink">{t("sub.savingOpportunities")}</h3>
           <ul className="mt-3 space-y-2">
             {recommendations.map((rec, i) => (
               <li key={i} className="flex items-start gap-2 text-sm leading-6 text-muted">
@@ -249,6 +251,7 @@ function subColor(sub: Subscription, idx: number) {
 }
 
 function SubscriptionDonut({ subscriptions, totalMonthly, currency }: { subscriptions: Subscription[]; totalMonthly: number; currency: string }) {
+  const { t } = useI18n();
   const size = 180;
   const cx = size / 2;
   const cy = size / 2;
@@ -293,7 +296,7 @@ function SubscriptionDonut({ subscriptions, totalMonthly, currency }: { subscrip
         arcs
       )}
       <text x={cx} y={cy - 8} textAnchor="middle" className="fill-ink text-lg font-black">{fmt(totalMonthly)}</text>
-      <text x={cx} y={cy + 10} textAnchor="middle" className="fill-muted text-xs">{currency}/mo</text>
+      <text x={cx} y={cy + 10} textAnchor="middle" className="fill-muted text-xs">{t("sub.perMoSuffix", { cur: currency })}</text>
     </svg>
   );
 }

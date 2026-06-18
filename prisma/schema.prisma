@@ -1,5 +1,8 @@
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
+  // Engine-less client (query compiler, no Rust engine / no fs access) so it
+  // runs on Cloudflare Workers. Pairs with the Neon driver adapter in db.ts.
+  engineType = "client"
 }
 
 datasource db {

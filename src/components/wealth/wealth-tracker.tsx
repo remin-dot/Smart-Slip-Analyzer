@@ -15,6 +15,7 @@ import {
   Wallet,
   X,
 } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 type WealthItem = {
   id: string;
@@ -49,15 +50,16 @@ type Data = {
   currency: string;
 };
 
-const TYPE_META: Record<string, { label: string; icon: typeof Wallet; color: string; side: "asset" | "liability" }> = {
-  CASH: { label: "Cash", icon: Banknote, color: "#20875a", side: "asset" },
-  INVESTMENT: { label: "Investment", icon: TrendingUp, color: "#2855a3", side: "asset" },
-  PROPERTY: { label: "Property", icon: Building2, color: "#cf8b21", side: "asset" },
-  DEBT: { label: "Debt", icon: CreditCard, color: "#d85c46", side: "liability" },
-  LOAN: { label: "Loan", icon: Landmark, color: "#8b5cf6", side: "liability" },
+const TYPE_META: Record<string, { labelKey: string; icon: typeof Wallet; color: string; side: "asset" | "liability" }> = {
+  CASH: { labelKey: "wealth.cash", icon: Banknote, color: "#20875a", side: "asset" },
+  INVESTMENT: { labelKey: "wealth.investment", icon: TrendingUp, color: "#2855a3", side: "asset" },
+  PROPERTY: { labelKey: "wealth.property", icon: Building2, color: "#cf8b21", side: "asset" },
+  DEBT: { labelKey: "wealth.debt", icon: CreditCard, color: "#d85c46", side: "liability" },
+  LOAN: { labelKey: "wealth.loan", icon: Landmark, color: "#8b5cf6", side: "liability" },
 };
 
 export function WealthTracker() {
+  const { t } = useI18n();
   const [data, setData] = useState<Data | null>(null);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -111,7 +113,7 @@ export function WealthTracker() {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-muted">
         <Loader2 className="animate-spin" size={32} />
-        <p className="mt-3 text-sm font-bold">Loading wealth data…</p>
+        <p className="mt-3 text-sm font-bold">{t("wealth.loading")}</p>
       </div>
     );
   }
@@ -128,27 +130,27 @@ export function WealthTracker() {
       {/* KPI cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          label="Total Assets"
+          label={t("wealth.totalAssets")}
           value={`${fmt(summary.totalAssets)} ${currency}`}
           icon={<Wallet size={18} />}
           color="#20875a"
         />
         <KpiCard
-          label="Total Liabilities"
+          label={t("wealth.totalLiabilities")}
           value={`${fmt(summary.totalLiabilities)} ${currency}`}
           icon={<CreditCard size={18} />}
           color="#d85c46"
         />
         <KpiCard
-          label="Net Worth"
+          label={t("wealth.netWorth")}
           value={`${fmt(summary.netWorth)} ${currency}`}
           icon={<TrendingUp size={18} />}
           color={summary.netWorth >= 0 ? "#087f7a" : "#d85c46"}
         />
         <KpiCard
-          label="Growth"
+          label={t("wealth.growth")}
           value={`${summary.growthAmount >= 0 ? "+" : ""}${fmt(summary.growthAmount)} ${currency}`}
-          sub={history.length >= 2 ? `${summary.growthPct >= 0 ? "+" : ""}${summary.growthPct}% since first record` : "Need more snapshots"}
+          sub={history.length >= 2 ? t("wealth.sinceFirst", { pct: `${summary.growthPct >= 0 ? "+" : ""}${summary.growthPct}` }) : t("wealth.needSnapshots")}
           icon={summary.growthAmount >= 0 ? <ArrowUp size={18} /> : <ArrowDown size={18} />}
           color={summary.growthAmount >= 0 ? "#20875a" : "#d85c46"}
         />
@@ -157,8 +159,8 @@ export function WealthTracker() {
       {/* Net worth chart */}
       {history.length >= 2 && (
         <div className="panel p-5">
-          <p className="eyebrow">Net worth over time</p>
-          <h3 className="mt-1 text-lg font-black text-ink">Growth History</h3>
+          <p className="eyebrow">{t("wealth.netWorthOverTime")}</p>
+          <h3 className="mt-1 text-lg font-black text-ink">{t("wealth.growthHistory")}</h3>
           <div className="mt-4 overflow-x-auto">
             <NetWorthChart history={history} currency={currency} />
           </div>
@@ -168,8 +170,8 @@ export function WealthTracker() {
       {/* Breakdown donut */}
       {items.length > 0 && (
         <div className="panel p-5">
-          <p className="eyebrow">Composition</p>
-          <h3 className="mt-1 text-lg font-black text-ink">Asset vs Liability Breakdown</h3>
+          <p className="eyebrow">{t("wealth.composition")}</p>
+          <h3 className="mt-1 text-lg font-black text-ink">{t("wealth.breakdownTitle")}</h3>
           <div className="mt-4 flex flex-col items-center gap-6 sm:flex-row sm:justify-center">
             <BreakdownDonut summary={summary} currency={currency} />
             <div className="grid gap-2 text-sm">
@@ -179,7 +181,7 @@ export function WealthTracker() {
                 return (
                   <div key={type} className="flex items-center gap-2">
                     <span className="h-3 w-3 rounded-full" style={{ background: meta.color }} />
-                    <span className="font-bold text-ink">{meta.label}</span>
+                    <span className="font-bold text-ink">{t(meta.labelKey)}</span>
                     <span className="text-muted">{fmt(val)} {currency}</span>
                   </div>
                 );
@@ -196,39 +198,39 @@ export function WealthTracker() {
           className="inline-flex items-center gap-2 rounded-lg bg-teal px-5 py-3 text-sm font-extrabold text-white hover:opacity-90"
         >
           {showForm ? <X size={16} /> : <Plus size={16} />}
-          {showForm ? "Cancel" : "Add Item"}
+          {showForm ? t("wealth.cancel") : t("wealth.addItem")}
         </button>
       </div>
 
       {showForm && (
         <form ref={formRef} onSubmit={handleAdd} className="panel space-y-4 p-5">
-          <p className="text-lg font-black text-ink">Add Wealth Item</p>
+          <p className="text-lg font-black text-ink">{t("wealth.addWealthItem")}</p>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-bold text-ink">Type</label>
+              <label className="mb-1 block text-sm font-bold text-ink">{t("wealth.type")}</label>
               <select name="type" required className="w-full rounded-lg border px-3 py-2.5 text-sm font-bold text-ink">
-                <optgroup label="Assets">
-                  <option value="CASH">Cash / Savings</option>
-                  <option value="INVESTMENT">Investment</option>
-                  <option value="PROPERTY">Property</option>
+                <optgroup label={t("wealth.assets")}>
+                  <option value="CASH">{t("wealth.cashSavings")}</option>
+                  <option value="INVESTMENT">{t("wealth.investment")}</option>
+                  <option value="PROPERTY">{t("wealth.property")}</option>
                 </optgroup>
-                <optgroup label="Liabilities">
-                  <option value="DEBT">Debt</option>
-                  <option value="LOAN">Loan</option>
+                <optgroup label={t("wealth.liabilities")}>
+                  <option value="DEBT">{t("wealth.debt")}</option>
+                  <option value="LOAN">{t("wealth.loan")}</option>
                 </optgroup>
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-bold text-ink">Name</label>
+              <label className="mb-1 block text-sm font-bold text-ink">{t("wealth.name")}</label>
               <input
                 name="name"
                 required
-                placeholder="e.g. Savings Account, Car Loan"
+                placeholder={t("wealth.namePlaceholder")}
                 className="w-full rounded-lg border px-3 py-2.5 text-sm text-ink"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-bold text-ink">Value ({currency})</label>
+              <label className="mb-1 block text-sm font-bold text-ink">{t("wealth.valueLabel", { cur: currency })}</label>
               <input
                 name="value"
                 type="number"
@@ -240,30 +242,30 @@ export function WealthTracker() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-bold text-ink">Note (optional)</label>
+              <label className="mb-1 block text-sm font-bold text-ink">{t("wealth.noteLabel")}</label>
               <input
                 name="note"
-                placeholder="Any details"
+                placeholder={t("wealth.notePlaceholder")}
                 className="w-full rounded-lg border px-3 py-2.5 text-sm text-ink"
               />
             </div>
           </div>
           <button type="submit" className="rounded-lg bg-teal px-5 py-2.5 text-sm font-extrabold text-white hover:opacity-90">
-            Save Item
+            {t("wealth.saveItem")}
           </button>
         </form>
       )}
 
       {/* Asset list */}
-      <ItemSection title="Assets" items={assets} currency={currency} deleting={deleting} onDelete={handleDelete} />
-      <ItemSection title="Liabilities" items={liabilities} currency={currency} deleting={deleting} onDelete={handleDelete} />
+      <ItemSection kind="assets" items={assets} currency={currency} deleting={deleting} onDelete={handleDelete} />
+      <ItemSection kind="liabilities" items={liabilities} currency={currency} deleting={deleting} onDelete={handleDelete} />
 
       {items.length === 0 && (
         <div className="panel flex flex-col items-center justify-center p-10 text-center">
           <Wallet size={40} className="text-muted/40" />
-          <p className="mt-3 text-lg font-black text-ink">No Wealth Items Yet</p>
+          <p className="mt-3 text-lg font-black text-ink">{t("wealth.noItems")}</p>
           <p className="mt-1 max-w-md text-sm text-muted">
-            Add your assets (cash, investments, property) and liabilities (debts, loans) to track your net worth over time.
+            {t("wealth.noItemsBody")}
           </p>
         </div>
       )}
@@ -282,26 +284,27 @@ function KpiCard({ label, value, sub, icon, color }: { label: string; value: str
 }
 
 function ItemSection({
-  title,
+  kind,
   items,
   currency,
   deleting,
   onDelete,
 }: {
-  title: string;
+  kind: "assets" | "liabilities";
   items: WealthItem[];
   currency: string;
   deleting: string | null;
   onDelete: (id: string) => void;
 }) {
+  const { t } = useI18n();
   if (items.length === 0) return null;
   const fmt = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 0 });
 
   return (
     <div className="panel divide-y">
       <div className="p-5">
-        <p className="eyebrow">{title === "Assets" ? "What you own" : "What you owe"}</p>
-        <h3 className="mt-1 text-lg font-black text-ink">{title}</h3>
+        <p className="eyebrow">{kind === "assets" ? t("wealth.whatYouOwn") : t("wealth.whatYouOwe")}</p>
+        <h3 className="mt-1 text-lg font-black text-ink">{kind === "assets" ? t("wealth.assets") : t("wealth.liabilities")}</h3>
       </div>
       {items.map((item) => {
         const meta = TYPE_META[item.type];
@@ -317,7 +320,7 @@ function ItemSection({
               </div>
               <div>
                 <p className="font-extrabold text-ink">{item.name}</p>
-                <p className="text-sm text-muted">{meta?.label ?? item.type}{item.note ? ` · ${item.note}` : ""}</p>
+                <p className="text-sm text-muted">{meta ? t(meta.labelKey) : item.type}{item.note ? ` · ${item.note}` : ""}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -325,7 +328,7 @@ function ItemSection({
               <button
                 onClick={() => onDelete(item.id)}
                 className={`rounded-lg p-2 text-sm ${deleting === item.id ? "bg-coral/10 text-coral" : "text-muted hover:text-coral"}`}
-                title={deleting === item.id ? "Click again to confirm" : "Delete"}
+                title={deleting === item.id ? t("wealth.deleteConfirm") : t("wealth.delete")}
               >
                 <Trash2 size={16} />
               </button>
@@ -383,7 +386,7 @@ function NetWorthChart({ history, currency }: { history: HistoryPoint[]; currenc
       <polyline points={points} fill="none" stroke="#087f7a" strokeWidth={2.5} strokeLinejoin="round" />
 
       {history.map((h, i) => {
-        const label = new Date(h.snapshotAt).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        const label = new Date(h.snapshotAt).toLocaleDateString(undefined, { month: "short", day: "numeric" });
         const showLabel = history.length <= 12 || i % Math.ceil(history.length / 8) === 0 || i === history.length - 1;
         return (
           <g key={h.id}>
@@ -397,6 +400,7 @@ function NetWorthChart({ history, currency }: { history: HistoryPoint[]; currenc
 }
 
 function BreakdownDonut({ summary, currency }: { summary: Summary; currency: string }) {
+  const { t } = useI18n();
   const size = 180;
   const cx = size / 2;
   const cy = size / 2;
@@ -409,7 +413,7 @@ function BreakdownDonut({ summary, currency }: { summary: Summary; currency: str
     return (
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <circle cx={cx} cy={cy} r={r} fill="none" stroke="#e5e7eb" strokeWidth={stroke} />
-        <text x={cx} y={cy + 4} textAnchor="middle" className="fill-muted text-sm">No data</text>
+        <text x={cx} y={cy + 4} textAnchor="middle" className="fill-muted text-sm">{t("wealth.noData")}</text>
       </svg>
     );
   }
@@ -450,7 +454,7 @@ function BreakdownDonut({ summary, currency }: { summary: Summary; currency: str
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
       {arcs}
       <text x={cx} y={cy - 8} textAnchor="middle" className="fill-ink text-lg font-black">{fmt(summary.netWorth)}</text>
-      <text x={cx} y={cy + 10} textAnchor="middle" className="fill-muted text-xs">{currency} net</text>
+      <text x={cx} y={cy + 10} textAnchor="middle" className="fill-muted text-xs">{t("wealth.netSuffix", { cur: currency })}</text>
     </svg>
   );
 }

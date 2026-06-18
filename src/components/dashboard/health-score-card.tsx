@@ -11,6 +11,7 @@ import {
   TrendingUp,
   Wallet,
 } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 type ScoreLevel = "Poor" | "Average" | "Good" | "Excellent";
 
@@ -46,7 +47,15 @@ const FACTOR_ICONS: Record<string, React.ReactNode> = {
   "Expense Consistency": <Activity size={16} />,
 };
 
+const LEVEL_LABEL_KEYS: Record<ScoreLevel, string> = {
+  Excellent: "health.lvExcellent",
+  Good: "health.lvGood",
+  Average: "health.lvAverage",
+  Poor: "health.lvPoor",
+};
+
 export function HealthScoreCard() {
+  const { t } = useI18n();
   const [data, setData] = useState<HealthScore | null>(null);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
@@ -64,7 +73,7 @@ export function HealthScoreCard() {
       <div className="panel grid min-h-[200px] place-items-center p-8">
         <div className="text-center">
           <Loader2 className="mx-auto animate-spin text-teal" size={24} />
-          <p className="mt-2 text-sm font-bold text-muted">Calculating health score...</p>
+          <p className="mt-2 text-sm font-bold text-muted">{t("health.calculating")}</p>
         </div>
       </div>
     );
@@ -75,8 +84,8 @@ export function HealthScoreCard() {
       <div className="panel grid min-h-[180px] place-items-center p-8 text-center">
         <div>
           <ShieldCheck size={32} className="mx-auto text-muted" />
-          <p className="mt-3 font-black text-ink">Financial Health Score</p>
-          <p className="mt-1 text-sm text-muted">Add transactions to calculate your score.</p>
+          <p className="mt-3 font-black text-ink">{t("health.noScoreTitle")}</p>
+          <p className="mt-1 text-sm text-muted">{t("health.addTx")}</p>
         </div>
       </div>
     );
@@ -91,11 +100,11 @@ export function HealthScoreCard() {
       <div className="p-5">
         <div className="mb-1 flex items-center justify-between">
           <div>
-            <p className="eyebrow">Financial health</p>
-            <h3 className="mt-1 text-xl font-black">Health Score</h3>
+            <p className="eyebrow">{t("health.eyebrow")}</p>
+            <h3 className="mt-1 text-xl font-black">{t("health.scoreHeading")}</h3>
           </div>
           <span className={`rounded-full px-3 py-1 text-xs font-extrabold ${colors.badge}`}>
-            {data.level}
+            {t(LEVEL_LABEL_KEYS[data.level])}
           </span>
         </div>
 
@@ -173,9 +182,9 @@ export function HealthScoreCard() {
           type="button"
         >
           {expanded ? (
-            <>Hide details <ChevronUp size={14} /></>
+            <>{t("health.hideDetails")} <ChevronUp size={14} /></>
           ) : (
-            <>View factor details <ChevronDown size={14} /></>
+            <>{t("health.viewDetails")} <ChevronDown size={14} /></>
           )}
         </button>
 
@@ -194,7 +203,7 @@ export function HealthScoreCard() {
                     </span>
                     <h4 className="font-black text-ink">{factor.name}</h4>
                     <span className={`ml-auto rounded-full px-2 py-0.5 text-[11px] font-bold ${factorColors.badge}`}>
-                      {factor.level}
+                      {t(LEVEL_LABEL_KEYS[factor.level])}
                     </span>
                   </div>
                   <p className="mt-2 text-sm leading-6 text-muted">{factor.description}</p>

@@ -14,6 +14,7 @@ import {
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 type Insight = {
   type: "spike" | "pattern" | "saving" | "alert" | "praise";
@@ -54,6 +55,7 @@ const TYPE_STYLES: Record<string, { bg: string; border: string; iconBg: string; 
 };
 
 export function InsightsPanel() {
+  const { t } = useI18n();
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -93,15 +95,15 @@ export function InsightsPanel() {
     return (
       <article className="panel p-5">
         <div className="mb-5">
-          <p className="eyebrow">AI-powered analysis</p>
-          <h3 className="mt-1 text-xl font-black">Spending Insights</h3>
+          <p className="eyebrow">{t("ins.eyebrow")}</p>
+          <h3 className="mt-1 text-xl font-black">{t("ins.title")}</h3>
         </div>
         <div className="grid min-h-[180px] place-items-center rounded-lg bg-slate-50 p-8 text-center">
           <div>
             <Bot size={36} className="mx-auto text-teal" />
-            <p className="mt-3 font-black text-ink">Generate your first spending analysis</p>
+            <p className="mt-3 font-black text-ink">{t("ins.generateFirst")}</p>
             <p className="mt-1 text-sm text-muted">
-              AI will analyze your transactions and provide personalized insights.
+              {t("ins.generateBody")}
             </p>
             <button
               className="mt-4 inline-flex items-center gap-2 rounded-lg bg-teal px-5 py-2.5 text-sm font-extrabold text-white hover:opacity-90 disabled:opacity-50"
@@ -110,9 +112,9 @@ export function InsightsPanel() {
               type="button"
             >
               {generating ? (
-                <><Loader2 className="animate-spin" size={16} /> Analyzing...</>
+                <><Loader2 className="animate-spin" size={16} /> {t("ins.analyzing")}</>
               ) : (
-                <><Sparkles size={16} /> Analyze my spending</>
+                <><Sparkles size={16} /> {t("ins.analyzeMy")}</>
               )}
             </button>
           </div>
@@ -132,8 +134,8 @@ export function InsightsPanel() {
       <article className="panel p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="eyebrow">AI-powered analysis</p>
-            <h3 className="mt-1 text-xl font-black">Spending Insights</h3>
+            <p className="eyebrow">{t("ins.eyebrow")}</p>
+            <h3 className="mt-1 text-xl font-black">{t("ins.title")}</h3>
           </div>
           <button
             className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-teal hover:bg-teal/5 disabled:opacity-50"
@@ -142,9 +144,9 @@ export function InsightsPanel() {
             type="button"
           >
             {generating ? (
-              <><Loader2 className="animate-spin" size={14} /> Refreshing...</>
+              <><Loader2 className="animate-spin" size={14} /> {t("ins.refreshing")}</>
             ) : (
-              <><Sparkles size={14} /> Refresh analysis</>
+              <><Sparkles size={14} /> {t("ins.refresh")}</>
             )}
           </button>
         </div>
@@ -155,16 +157,16 @@ export function InsightsPanel() {
           <div>
             <p className="text-sm font-bold leading-6 text-ink">{analysis.summary}</p>
             <div className="mt-1.5 flex flex-wrap items-center gap-3 text-[11px] font-bold text-muted">
-              <span>Model: {analysis.modelName}</span>
-              <span>Confidence: {(analysis.confidence * 100).toFixed(0)}%</span>
+              <span>{t("ins.model", { model: analysis.modelName })}</span>
+              <span>{t("ins.confidence", { pct: (analysis.confidence * 100).toFixed(0) })}</span>
               {analysis.createdAt && (
                 <span>
-                  Generated: {new Date(analysis.createdAt).toLocaleDateString("en-US", {
+                  {t("ins.generated", { date: new Date(analysis.createdAt).toLocaleDateString(undefined, {
                     day: "numeric",
                     month: "short",
                     hour: "2-digit",
                     minute: "2-digit",
-                  })}
+                  }) })}
                 </span>
               )}
             </div>
@@ -220,7 +222,7 @@ export function InsightsPanel() {
             <div className="grid h-8 w-8 place-items-center rounded-lg bg-ocean/10 text-ocean">
               <Lightbulb size={16} />
             </div>
-            <h3 className="text-lg font-black">Recommendations</h3>
+            <h3 className="text-lg font-black">{t("ins.recommendations")}</h3>
           </div>
           <div className="grid gap-2">
             {analysis.recommendations.map((rec, i) => (

@@ -18,6 +18,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 type Category = {
   id: string;
@@ -45,14 +46,15 @@ type SortDir = "asc" | "desc";
 
 const PAGE_SIZE = 15;
 
-const SOURCE_LABELS: Record<string, string> = {
-  MANUAL: "Manual",
-  SLIP_SCAN: "Slip Scan",
-  BANK_IMPORT: "Bank Import",
-  AI_INFERRED: "AI Inferred",
+const SOURCE_LABEL_KEYS: Record<string, string> = {
+  MANUAL: "tx.srcManual",
+  SLIP_SCAN: "tx.srcSlipScan",
+  BANK_IMPORT: "tx.srcBankImport",
+  AI_INFERRED: "tx.srcAiInferred",
 };
 
 export function TransactionList() {
+  const { t } = useI18n();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [total, setTotal] = useState(0);
@@ -127,16 +129,16 @@ export function TransactionList() {
       if (filterTo) params.set("to", filterTo);
 
       const res = await fetch(`/api/transactions?${params}`);
-      if (!res.ok) throw new Error("Failed to load transactions.");
+      if (!res.ok) throw new Error("load");
       const data = await res.json();
       setTransactions(data.transactions);
       setTotal(data.total);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load.");
+    } catch {
+      setError(t("tx.loadError"));
     } finally {
       setLoading(false);
     }
-  }, [page, sortBy, sortDir, debouncedSearch, filterCategory, filterType, filterSource, filterFrom, filterTo]);
+  }, [page, sortBy, sortDir, debouncedSearch, filterCategory, filterType, filterSource, filterFrom, filterTo, t]);
 
   useEffect(() => { fetchTransactions(); }, [fetchTransactions]);
 
@@ -186,11 +188,11 @@ export function TransactionList() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      if (!res.ok) throw new Error("Save failed.");
+      if (!res.ok) throw new Error("save");
       cancelEdit();
       fetchTransactions();
     } catch {
-      setError("Failed to save changes.");
+      setError(t("tx.saveError"));
     }
   };
 
@@ -198,11 +200,11 @@ export function TransactionList() {
   const confirmDelete = async (id: string) => {
     try {
       const res = await fetch(`/api/transactions/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Delete failed.");
+      if (!res.ok) throw new Error("delete");
       setDeletingId(null);
       fetchTransactions();
     } catch {
-      setError("Failed to delete transaction.");
+      setError(t("tx.deleteError"));
     }
   };
 
@@ -215,10 +217,10 @@ export function TransactionList() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ transactionId: id }),
       });
-      if (!res.ok) throw new Error("Classification failed.");
+      if (!res.ok) throw new Error("classify");
       fetchTransactions();
     } catch {
-      setError("Failed to classify.");
+      setError(t("tx.classifyError"));
     } finally {
       setClassifyingId(null);
     }
@@ -235,10 +237,10 @@ export function TransactionList() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ transactionIds: ids }),
       });
-      if (!res.ok) throw new Error("Batch classification failed.");
+      if (!res.ok) throw new Error("classify");
       fetchTransactions();
     } catch {
-      setError("Failed to classify transactions.");
+      setError(t("tx.classifyError"));
     } finally {
       setClassifyingAll(false);
     }
@@ -277,7 +279,7 @@ export function TransactionList() {
             <input
               className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm font-semibold text-ink outline-none placeholder:text-slate-400 focus:border-teal focus:ring-1 focus:ring-teal"
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search merchant or description..."
+              placeholder={t("tx.searchPlaceholder")}
               type="text"
               value={search}
             />
@@ -289,7 +291,7 @@ export function TransactionList() {
             onChange={(e) => setFilterCategory(e.target.value)}
             value={filterCategory}
           >
-            <option value="">All categories</option>
+            <option value="">{t("tx.allCategories")}</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
@@ -301,10 +303,10 @@ export function TransactionList() {
             onChange={(e) => setFilterType(e.target.value)}
             value={filterType}
           >
-            <option value="">All types</option>
-            <option value="EXPENSE">Expense</option>
-            <option value="INCOME">Income</option>
-            <option value="TRANSFER">Transfer</option>
+            <option value="">{t("tx.allTypes")}</option>
+            <option value="EXPENSE">{t("tx.expense")}</option>
+            <option value="INCOME">{t("tx.income")}</option>
+            <option value="TRANSFER">{t("tx.transfer")}</option>
           </select>
 
           {/* Source filter */}
@@ -313,25 +315,25 @@ export function TransactionList() {
             onChange={(e) => setFilterSource(e.target.value)}
             value={filterSource}
           >
-            <option value="">All sources</option>
-            <option value="MANUAL">Manual</option>
-            <option value="SLIP_SCAN">Slip Scan</option>
-            <option value="BANK_IMPORT">Bank Import</option>
-            <option value="AI_INFERRED">AI Inferred</option>
+            <option value="">{t("tx.allSources")}</option>
+            <option value="MANUAL">{t("tx.srcManual")}</option>
+            <option value="SLIP_SCAN">{t("tx.srcSlipScan")}</option>
+            <option value="BANK_IMPORT">{t("tx.srcBankImport")}</option>
+            <option value="AI_INFERRED">{t("tx.srcAiInferred")}</option>
           </select>
 
           {/* Date range */}
           <input
             className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-ink outline-none focus:border-teal"
             onChange={(e) => setFilterFrom(e.target.value)}
-            title="From date"
+            title={t("tx.fromDate")}
             type="date"
             value={filterFrom}
           />
           <input
             className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-ink outline-none focus:border-teal"
             onChange={(e) => setFilterTo(e.target.value)}
-            title="To date"
+            title={t("tx.toDate")}
             type="date"
             value={filterTo}
           />
@@ -342,7 +344,7 @@ export function TransactionList() {
               onClick={clearFilters}
               type="button"
             >
-              Clear
+              {t("tx.clear")}
             </button>
           )}
         </div>
@@ -352,7 +354,7 @@ export function TransactionList() {
       {uncategorizedCount > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber/30 bg-amber/10 px-5 py-3">
           <p className="text-sm font-bold text-ink">
-            {uncategorizedCount} uncategorized transaction{uncategorizedCount > 1 ? "s" : ""} on this page
+            {t("tx.uncategorizedCount", { n: uncategorizedCount })}
           </p>
           <button
             className="inline-flex items-center gap-2 rounded-lg bg-teal px-4 py-2 text-sm font-extrabold text-white hover:opacity-90 disabled:opacity-50"
@@ -361,7 +363,7 @@ export function TransactionList() {
             type="button"
           >
             {classifyingAll ? <Loader2 className="animate-spin" size={16} /> : <Sparkles size={16} />}
-            Classify all
+            {t("tx.classifyAll")}
           </button>
         </div>
       )}
@@ -372,12 +374,12 @@ export function TransactionList() {
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/60">
-                <SortHeader field="occurredAt" label="Date" current={sortBy} dir={sortDir} onSort={toggleSort} />
-                <SortHeader field="merchant" label="Merchant" current={sortBy} dir={sortDir} onSort={toggleSort} />
-                <th className="px-4 py-3 font-extrabold text-muted">Category</th>
-                <SortHeader field="amount" label="Amount" current={sortBy} dir={sortDir} onSort={toggleSort} className="text-right" />
-                <th className="px-4 py-3 font-extrabold text-muted">Source</th>
-                <th className="px-4 py-3 text-right font-extrabold text-muted">Actions</th>
+                <SortHeader field="occurredAt" label={t("tx.colDate")} current={sortBy} dir={sortDir} onSort={toggleSort} />
+                <SortHeader field="merchant" label={t("tx.colMerchant")} current={sortBy} dir={sortDir} onSort={toggleSort} />
+                <th className="px-4 py-3 font-extrabold text-muted">{t("tx.colCategory")}</th>
+                <SortHeader field="amount" label={t("tx.colAmount")} current={sortBy} dir={sortDir} onSort={toggleSort} className="text-right" />
+                <th className="px-4 py-3 font-extrabold text-muted">{t("tx.colSource")}</th>
+                <th className="px-4 py-3 text-right font-extrabold text-muted">{t("tx.colActions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -392,10 +394,10 @@ export function TransactionList() {
                   <td className="px-4 py-12 text-center" colSpan={6}>
                     <Bot size={32} className="mx-auto text-slate-300" />
                     <p className="mt-3 font-black text-ink">
-                      {hasFilters ? "No matching transactions" : "No transactions yet"}
+                      {hasFilters ? t("tx.noMatching") : t("tx.noTx")}
                     </p>
                     <p className="mt-1 text-sm text-muted">
-                      {hasFilters ? "Try adjusting your filters." : "Scan a slip or add a transaction to get started."}
+                      {hasFilters ? t("tx.tryAdjusting") : t("tx.getStarted")}
                     </p>
                   </td>
                 </tr>
@@ -433,9 +435,7 @@ export function TransactionList() {
         {total > 0 && (
           <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3">
             <p className="text-sm text-muted">
-              Showing <span className="font-bold text-ink">{page * PAGE_SIZE + 1}</span>–
-              <span className="font-bold text-ink">{Math.min((page + 1) * PAGE_SIZE, total)}</span> of{" "}
-              <span className="font-bold text-ink">{total}</span>
+              {t("tx.showing", { from: page * PAGE_SIZE + 1, to: Math.min((page + 1) * PAGE_SIZE, total), total })}
             </p>
             <div className="flex items-center gap-1">
               <button
@@ -545,6 +545,7 @@ function TableRow({
   onCancelDelete: () => void;
   onClassify: () => void;
 }) {
+  const { t } = useI18n();
   const amount = Number(tx.amount);
   const isIncome = tx.type === "INCOME";
   const date = new Date(tx.occurredAt);
@@ -556,10 +557,10 @@ function TableRow({
       {/* Date */}
       <td className="whitespace-nowrap px-4 py-3.5">
         <p className="font-bold text-ink">
-          {date.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" })}
+          {date.toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" })}
         </p>
         <p className="text-xs text-muted">
-          {date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+          {date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}
         </p>
       </td>
 
@@ -591,7 +592,7 @@ function TableRow({
             type="button"
           >
             {isClassifying ? <Loader2 className="animate-spin" size={12} /> : <Sparkles size={12} />}
-            Classify
+            {t("tx.classify")}
           </button>
         )}
       </td>
@@ -613,7 +614,7 @@ function TableRow({
               ? "bg-ocean/10 text-ocean"
               : "bg-slate-100 text-muted"
         }`}>
-          {SOURCE_LABELS[tx.source] ?? tx.source}
+          {SOURCE_LABEL_KEYS[tx.source] ? t(SOURCE_LABEL_KEYS[tx.source]) : tx.source}
         </span>
       </td>
 
@@ -621,11 +622,11 @@ function TableRow({
       <td className="whitespace-nowrap px-4 py-3.5 text-right">
         {isDeleting ? (
           <span className="inline-flex items-center gap-2">
-            <span className="text-xs font-bold text-coral">Delete?</span>
+            <span className="text-xs font-bold text-coral">{t("tx.deleteQ")}</span>
             <button
               className="rounded p-1 text-coral hover:bg-coral/10"
               onClick={onConfirmDelete}
-              title="Confirm delete"
+              title={t("tx.confirmDelete")}
               type="button"
             >
               <Check size={15} />
@@ -633,7 +634,7 @@ function TableRow({
             <button
               className="rounded p-1 text-muted hover:bg-slate-100"
               onClick={onCancelDelete}
-              title="Cancel"
+              title={t("tx.cancel")}
               type="button"
             >
               <X size={15} />
@@ -644,7 +645,7 @@ function TableRow({
             <button
               className="rounded p-1.5 text-muted hover:bg-slate-100 hover:text-ink"
               onClick={onEdit}
-              title="Edit"
+              title={t("tx.edit")}
               type="button"
             >
               <Pencil size={15} />
@@ -652,7 +653,7 @@ function TableRow({
             <button
               className="rounded p-1.5 text-muted hover:bg-coral/10 hover:text-coral"
               onClick={onDelete}
-              title="Delete"
+              title={t("tx.delete")}
               type="button"
             >
               <Trash2 size={15} />
@@ -677,6 +678,7 @@ function EditRow({
   onSave: () => void;
   onCancel: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <tr className="border-b border-teal/20 bg-teal/5">
       {/* Date */}
@@ -694,7 +696,7 @@ function EditRow({
         <input
           className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-sm font-semibold outline-none focus:border-teal"
           onChange={(e) => onChange({ ...form, merchant: e.target.value })}
-          placeholder="Merchant name"
+          placeholder={t("tx.merchantName")}
           type="text"
           value={form.merchant}
         />
@@ -707,7 +709,7 @@ function EditRow({
           onChange={(e) => onChange({ ...form, categoryId: e.target.value })}
           value={form.categoryId}
         >
-          <option value="">No category</option>
+          <option value="">{t("tx.noCategory")}</option>
           {categories.map((c) => (
             <option key={c.id} value={c.id}>{c.name}</option>
           ))}
@@ -722,9 +724,9 @@ function EditRow({
             onChange={(e) => onChange({ ...form, type: e.target.value })}
             value={form.type}
           >
-            <option value="EXPENSE">Expense</option>
-            <option value="INCOME">Income</option>
-            <option value="TRANSFER">Transfer</option>
+            <option value="EXPENSE">{t("tx.expense")}</option>
+            <option value="INCOME">{t("tx.income")}</option>
+            <option value="TRANSFER">{t("tx.transfer")}</option>
           </select>
           <input
             className="w-28 rounded border border-slate-200 bg-white px-2 py-1.5 text-right text-sm font-semibold outline-none focus:border-teal"
@@ -748,7 +750,7 @@ function EditRow({
           <button
             className="rounded bg-teal p-1.5 text-white hover:opacity-90"
             onClick={onSave}
-            title="Save"
+            title={t("tx.save")}
             type="button"
           >
             <Save size={15} />
@@ -756,7 +758,7 @@ function EditRow({
           <button
             className="rounded border border-slate-200 bg-white p-1.5 text-muted hover:text-ink"
             onClick={onCancel}
-            title="Cancel"
+            title={t("tx.cancel")}
             type="button"
           >
             <X size={15} />

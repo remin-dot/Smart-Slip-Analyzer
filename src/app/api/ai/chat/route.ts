@@ -10,6 +10,7 @@ const chatSchema = z.object({
     role: z.enum(["user", "assistant"]),
     content: z.string(),
   })).max(20).default([]),
+  locale: z.enum(["en", "th", "zh", "ja"]).default("en"),
 });
 
 export async function POST(request: NextRequest) {
@@ -18,11 +19,11 @@ export async function POST(request: NextRequest) {
     if (response) return response;
 
     const body = await request.json();
-    const { message, history } = chatSchema.parse(body);
+    const { message, history, locale } = chatSchema.parse(body);
 
     const context = await buildFinancialContext(userId);
 
-    const reply = await chatWithFinanceAI(message, history as ChatMessage[], context);
+    const reply = await chatWithFinanceAI(message, history as ChatMessage[], context, locale);
 
     return NextResponse.json({ reply, model: process.env.OPENAI_API_KEY ? "gpt-4o-mini" : "local-rule-engine" });
   } catch (error) {

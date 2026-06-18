@@ -10,6 +10,8 @@ import {
   TrendingUp,
   Wallet,
 } from "lucide-react";
+import { formatCurrency } from "@/lib/format";
+import { useI18n } from "@/lib/i18n";
 import { BarChart } from "./bar-chart";
 import { DonutChart } from "./donut-chart";
 import { HealthScoreCard } from "./health-score-card";
@@ -45,6 +47,7 @@ type DashboardData = {
 };
 
 export function AnalyticsDashboard() {
+  const { t } = useI18n();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -61,7 +64,7 @@ export function AnalyticsDashboard() {
       <div className="grid min-h-[400px] place-items-center">
         <div className="text-center">
           <Loader2 className="mx-auto animate-spin text-teal" size={32} />
-          <p className="mt-3 text-sm font-bold text-muted">Loading analytics...</p>
+          <p className="mt-3 text-sm font-bold text-muted">{t("dash.loading")}</p>
         </div>
       </div>
     );
@@ -70,15 +73,14 @@ export function AnalyticsDashboard() {
   if (!data) {
     return (
       <div className="panel grid min-h-[300px] place-items-center p-8 text-center">
-        <p className="font-black text-ink">Unable to load dashboard data.</p>
+        <p className="font-black text-ink">{t("dash.loadError")}</p>
       </div>
     );
   }
 
   const { summary: s } = data;
   const cur = s.currency;
-  const fmt = (n: number) =>
-    n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const money = (n: number) => formatCurrency(n, cur);
 
   return (
     <div className="grid gap-5">
@@ -88,39 +90,36 @@ export function AnalyticsDashboard() {
       {/* KPI cards */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
-          label="Total Income"
-          value={`${fmt(s.totalIncome)}`}
-          currency={cur}
-          sub={`${fmt(s.monthIncome)} this month`}
+          label={t("dash.totalIncome")}
+          value={money(s.totalIncome)}
+          sub={`${money(s.monthIncome)} ${t("dash.thisMonth")}`}
           icon={<TrendingUp size={20} />}
           iconBg="bg-mint/10"
           iconColor="text-mint"
           trend={s.monthIncome > 0 ? "up" : undefined}
         />
         <KpiCard
-          label="Total Expenses"
-          value={`${fmt(s.totalExpense)}`}
-          currency={cur}
-          sub={`${fmt(s.monthExpense)} this month`}
+          label={t("dash.totalExpenses")}
+          value={money(s.totalExpense)}
+          sub={`${money(s.monthExpense)} ${t("dash.thisMonth")}`}
           icon={<TrendingDown size={20} />}
           iconBg="bg-coral/10"
           iconColor="text-coral"
           trend={s.monthExpense > 0 ? "down" : undefined}
         />
         <KpiCard
-          label="Balance"
-          value={`${fmt(s.balance)}`}
-          currency={cur}
-          sub={`${s.balance >= 0 ? "+" : ""}${fmt(s.monthBalance)} this month`}
+          label={t("dash.balance")}
+          value={money(s.balance)}
+          sub={`${s.balance >= 0 ? "+" : ""}${money(s.monthBalance)} ${t("dash.thisMonth")}`}
           icon={<Wallet size={20} />}
           iconBg="bg-ocean/10"
           iconColor="text-ocean"
           trend={s.monthBalance >= 0 ? "up" : "down"}
         />
         <KpiCard
-          label="Saving Rate"
+          label={t("dash.savingRate")}
           value={`${s.savingRate}%`}
-          sub={s.savingRate >= 20 ? "Healthy savings" : s.savingRate > 0 ? "Below target" : "No income recorded"}
+          sub={s.savingRate >= 20 ? t("dash.healthySavings") : s.savingRate > 0 ? t("dash.belowTarget") : t("dash.noIncome")}
           icon={<PiggyBank size={20} />}
           iconBg={s.savingRate >= 20 ? "bg-mint/10" : "bg-amber/10"}
           iconColor={s.savingRate >= 20 ? "text-mint" : "text-amber"}
@@ -132,25 +131,25 @@ export function AnalyticsDashboard() {
       <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
         <article className="panel p-5">
           <div className="mb-5">
-            <p className="eyebrow">Last 6 months</p>
-            <h3 className="mt-1 text-xl font-black">Monthly Income vs Expenses</h3>
+            <p className="eyebrow">{t("dash.last6mo")}</p>
+            <h3 className="mt-1 text-xl font-black">{t("dash.monthlyIncomeVsExpenses")}</h3>
           </div>
           {data.monthlyExpenses.some((d) => d.income > 0 || d.expense > 0) ? (
             <BarChart data={data.monthlyExpenses} currency={cur} />
           ) : (
-            <EmptyChart message="No transaction data for the last 6 months." />
+            <EmptyChart message={t("dash.noData6mo")} />
           )}
         </article>
 
         <article className="panel p-5">
           <div className="mb-5">
-            <p className="eyebrow">All time</p>
-            <h3 className="mt-1 text-xl font-black">Spending by Category</h3>
+            <p className="eyebrow">{t("dash.allTime")}</p>
+            <h3 className="mt-1 text-xl font-black">{t("dash.spendingByCategory")}</h3>
           </div>
           {data.categorySpending.length > 0 ? (
             <DonutChart data={data.categorySpending} currency={cur} />
           ) : (
-            <EmptyChart message="No categorized expenses yet." />
+            <EmptyChart message={t("dash.noCategorized")} />
           )}
         </article>
       </div>
@@ -159,14 +158,14 @@ export function AnalyticsDashboard() {
       <article className="panel p-5">
         <div className="mb-5 flex items-start justify-between">
           <div>
-            <p className="eyebrow">Last 30 days</p>
-            <h3 className="mt-1 text-xl font-black">Spending Trend</h3>
+            <p className="eyebrow">{t("dash.last30")}</p>
+            <h3 className="mt-1 text-xl font-black">{t("dash.spendingTrend")}</h3>
           </div>
           <div className="text-right">
             <p className="text-2xl font-black text-ink">
-              {fmt(data.spendingTrend.reduce((sum, d) => sum + d.amount, 0))}
+              {money(data.spendingTrend.reduce((sum, d) => sum + d.amount, 0))}
             </p>
-            <p className="text-xs font-bold text-muted">{cur} total spent</p>
+            <p className="text-xs font-bold text-muted">{t("dash.totalSpent")}</p>
           </div>
         </div>
         <TrendChart data={data.spendingTrend} currency={cur} />
@@ -179,14 +178,14 @@ export function AnalyticsDashboard() {
       <article className="panel p-5">
         <div className="mb-5 flex items-center justify-between">
           <div>
-            <p className="eyebrow">Recent activity</p>
-            <h3 className="mt-1 text-xl font-black">Latest Transactions</h3>
+            <p className="eyebrow">{t("dash.recentActivity")}</p>
+            <h3 className="mt-1 text-xl font-black">{t("dash.latestTransactions")}</h3>
           </div>
           <a
             className="text-sm font-extrabold text-teal hover:underline"
             href="/transactions"
           >
-            View all
+            {t("dash.viewAll")}
           </a>
         </div>
         {data.recentTransactions.length > 0 ? (
@@ -206,27 +205,27 @@ export function AnalyticsDashboard() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-bold text-ink">{tx.merchant}</p>
                     <p className="text-xs text-muted">
-                      {tx.category?.name ?? "Uncategorized"} &middot;{" "}
-                      {date.toLocaleDateString("en-US", { day: "numeric", month: "short" })}
+                      {tx.category?.name ?? t("dash.uncategorized")} &middot;{" "}
+                      {date.toLocaleDateString(undefined, { day: "numeric", month: "short" })}
                     </p>
                   </div>
                   <span className={`shrink-0 font-black ${isIncome ? "text-mint" : "text-ink"}`}>
-                    {isIncome ? "+" : "-"}{fmt(tx.amount)} {cur}
+                    {isIncome ? "+" : "-"}{money(tx.amount)}
                   </span>
                 </div>
               );
             })}
           </div>
         ) : (
-          <EmptyChart message="No transactions yet. Scan a slip to get started." />
+          <EmptyChart message={t("dash.noTx")} />
         )}
       </article>
 
       {/* Stats footer */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatBox label="Total transactions" value={String(s.txCount)} />
-        <StatBox label="This month" value={String(s.monthTxCount)} />
-        <StatBox label="Profile saving goal" value={`${fmt(s.profileSavingGoal)} ${cur}`} />
+        <StatBox label={t("dash.totalTransactions")} value={String(s.txCount)} />
+        <StatBox label={t("dash.thisMonthCount")} value={String(s.monthTxCount)} />
+        <StatBox label={t("dash.profileSavingGoal")} value={money(s.profileSavingGoal)} />
       </div>
     </div>
   );

@@ -21,6 +21,7 @@ import {
   Trophy,
   Wallet,
 } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 type Achievement = {
   id: string;
@@ -65,6 +66,7 @@ const ICON_MAP: Record<string, typeof Star> = {
 const LEVEL_COLORS = ["#687188", "#087f7a", "#2855a3", "#cf8b21"];
 
 export function GamificationPanel() {
+  const { t } = useI18n();
   const [data, setData] = useState<Data | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -80,12 +82,12 @@ export function GamificationPanel() {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-muted">
         <Loader2 className="animate-spin" size={32} />
-        <p className="mt-3 text-sm font-bold">Loading your progress…</p>
+        <p className="mt-3 text-sm font-bold">{t("gam.loading")}</p>
       </div>
     );
   }
 
-  if (!data) return <div className="panel p-6 text-center text-coral font-bold">Could not load gamification data.</div>;
+  if (!data) return <div className="panel p-6 text-center text-coral font-bold">{t("gam.loadError")}</div>;
 
   const { xp, level, nextLevel, levelProgress, levels, achievements, stats, currency } = data;
   const fmt = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 0 });
@@ -105,16 +107,16 @@ export function GamificationPanel() {
                 <LevelIcon size={28} />
               </div>
               <div>
-                <p className="text-sm font-bold text-muted">Level {level.rank}</p>
+                <p className="text-sm font-bold text-muted">{t("gam.level", { rank: level.rank })}</p>
                 <h2 className="text-2xl font-black text-ink">{level.name}</h2>
                 <p className="mt-0.5 text-sm font-bold" style={{ color: LEVEL_COLORS[level.rank - 1] }}>{fmt(xp)} XP</p>
               </div>
             </div>
             <div className="text-right">
               <p className="text-sm font-bold text-muted">
-                {stats.unlockedCount}/{stats.totalAchievements} achievements
+                {t("gam.achievementsCount", { unlocked: stats.unlockedCount, total: stats.totalAchievements })}
               </p>
-              <p className="text-sm text-muted">{stats.savingRate}% saving rate</p>
+              <p className="text-sm text-muted">{t("gam.savingRate", { pct: stats.savingRate })}</p>
             </div>
           </div>
 
@@ -132,13 +134,13 @@ export function GamificationPanel() {
                 />
               </div>
               <p className="mt-1 text-center text-xs text-muted">
-                {fmt(nextLevel.minXp - xp)} XP to next level
+                {t("gam.xpToNext", { xp: fmt(nextLevel.minXp - xp) })}
               </p>
             </div>
           )}
           {!nextLevel && (
             <p className="mt-4 text-center text-sm font-bold" style={{ color: LEVEL_COLORS[3] }}>
-              Max level reached!
+              {t("gam.maxLevel")}
             </p>
           )}
         </div>
@@ -146,8 +148,8 @@ export function GamificationPanel() {
 
       {/* Level roadmap */}
       <div className="panel p-5">
-        <p className="eyebrow">Your journey</p>
-        <h3 className="mt-1 text-lg font-black text-ink">Level Roadmap</h3>
+        <p className="eyebrow">{t("gam.yourJourney")}</p>
+        <h3 className="mt-1 text-lg font-black text-ink">{t("gam.levelRoadmap")}</h3>
         <div className="mt-4 grid gap-3 sm:grid-cols-4">
           {levels.map((lv) => {
             const Icon = ICON_MAP[lv.icon] ?? Star;
@@ -168,7 +170,7 @@ export function GamificationPanel() {
                 <p className="text-xs text-muted">{fmt(lv.minXp)} XP</p>
                 {level.rank === lv.rank && (
                   <span className="absolute -top-2 right-2 rounded-full bg-teal px-2 py-0.5 text-[10px] font-black text-white">
-                    YOU
+                    {t("gam.you")}
                   </span>
                 )}
               </div>
@@ -179,17 +181,17 @@ export function GamificationPanel() {
 
       {/* Stats strip */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Transactions" value={fmt(stats.txCount)} color="#087f7a" />
-        <StatCard label="Total Saved" value={`${fmt(stats.totalSaving)} ${currency}`} color="#20875a" />
-        <StatCard label="Goals Completed" value={String(stats.completedGoals)} color="#2855a3" />
-        <StatCard label="Months Active" value={String(stats.monthsActive)} color="#cf8b21" />
+        <StatCard label={t("gam.transactions")} value={fmt(stats.txCount)} color="#087f7a" />
+        <StatCard label={t("gam.totalSaved")} value={`${fmt(stats.totalSaving)} ${currency}`} color="#20875a" />
+        <StatCard label={t("gam.goalsCompleted")} value={String(stats.completedGoals)} color="#2855a3" />
+        <StatCard label={t("gam.monthsActive")} value={String(stats.monthsActive)} color="#cf8b21" />
       </div>
 
       {/* Achievements */}
       <div className="panel p-5">
-        <p className="eyebrow">Achievements</p>
+        <p className="eyebrow">{t("gam.achievements")}</p>
         <h3 className="mt-1 text-lg font-black text-ink">
-          {stats.unlockedCount} of {stats.totalAchievements} Unlocked
+          {t("gam.unlockedOf", { unlocked: stats.unlockedCount, total: stats.totalAchievements })}
         </h3>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {achievements.map((ach) => (
@@ -211,6 +213,7 @@ function StatCard({ label, value, color }: { label: string; value: string; color
 }
 
 function AchievementCard({ achievement: a }: { achievement: Achievement }) {
+  const { t } = useI18n();
   const Icon = ICON_MAP[a.icon] ?? Star;
   const pct = a.target > 0 ? Math.min(Math.round((a.progress / a.target) * 100), 100) : 0;
   const fmt = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 0 });
@@ -244,7 +247,7 @@ function AchievementCard({ achievement: a }: { achievement: Achievement }) {
 
           {a.unlocked && a.unlockedAt && (
             <p className="mt-1 text-[10px] text-teal">
-              Unlocked {new Date(a.unlockedAt).toLocaleDateString()}
+              {t("gam.unlockedOn", { date: new Date(a.unlockedAt).toLocaleDateString() })}
             </p>
           )}
         </div>

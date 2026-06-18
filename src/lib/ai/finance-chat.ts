@@ -35,16 +35,25 @@ Rules:
 - Never give investment advice or guarantee financial outcomes
 - Format numbers with commas for readability`;
 
+// Locale code → language the model should answer in.
+const LANG_NAMES: Record<string, string> = {
+  en: "English",
+  th: "Thai (ภาษาไทย)",
+  zh: "Simplified Chinese (简体中文)",
+  ja: "Japanese (日本語)",
+};
+
 export async function chatWithFinanceAI(
   message: string,
   history: ChatMessage[],
-  context: FinancialContext
+  context: FinancialContext,
+  locale = "en"
 ): Promise<string> {
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (apiKey) {
     try {
-      return await chatWithOpenAI(message, history, context, apiKey);
+      return await chatWithOpenAI(message, history, context, apiKey, locale);
     } catch (error) {
       console.error("AI chat failed, falling back to rules:", error);
     }
@@ -57,12 +66,15 @@ async function chatWithOpenAI(
   message: string,
   history: ChatMessage[],
   context: FinancialContext,
-  apiKey: string
+  apiKey: string,
+  locale: string
 ): Promise<string> {
   const dataContext = buildContextPrompt(context);
+  const lang = LANG_NAMES[locale] ?? "English";
+  const langRule = `\n\nIMPORTANT: The user's interface language is ${lang}. Always write your entire reply in ${lang}, regardless of the language the question is written in. Keep currency codes and numbers as-is.`;
 
   const messages = [
-    { role: "system" as const, content: `${SYSTEM_PROMPT}\n\n--- USER FINANCIAL DATA ---\n${dataContext}` },
+    { role: "system" as const, content: `${SYSTEM_PROMPT}${langRule}\n\n--- USER FINANCIAL DATA ---\n${dataContext}` },
     ...history.slice(-8).map((m) => ({
       role: m.role as "user" | "assistant",
       content: m.content,

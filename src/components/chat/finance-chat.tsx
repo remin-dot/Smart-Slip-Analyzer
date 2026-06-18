@@ -4,11 +4,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Bot,
   Loader2,
-  MessageCircle,
   Send,
   Sparkles,
   User,
 } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 type Message = {
   id: string;
@@ -18,15 +18,16 @@ type Message = {
 };
 
 const QUICK_PROMPTS = [
-  { label: "Where did my money go?", icon: "💸" },
-  { label: "How much can I save?", icon: "🏦" },
-  { label: "Should I buy this product?", icon: "🛒" },
-  { label: "How can I reduce expenses?", icon: "✂️" },
-  { label: "What's my budget status?", icon: "📊" },
-  { label: "Show my saving goals", icon: "🎯" },
+  { key: "chatui.prompt.where", icon: "💸" },
+  { key: "chatui.prompt.save", icon: "🏦" },
+  { key: "chatui.prompt.buy", icon: "🛒" },
+  { key: "chatui.prompt.reduce", icon: "✂️" },
+  { key: "chatui.prompt.budget", icon: "📊" },
+  { key: "chatui.prompt.goals", icon: "🎯" },
 ];
 
 export function FinanceChatPanel() {
+  const { t, locale } = useI18n();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -68,6 +69,7 @@ export function FinanceChatPanel() {
         body: JSON.stringify({
           message: text.trim(),
           history,
+          locale,
         }),
       });
 
@@ -88,7 +90,7 @@ export function FinanceChatPanel() {
       const errorMsg: Message = {
         id: `e-${Date.now()}`,
         role: "assistant",
-        content: "Sorry, I couldn't process your request. Please try again.",
+        content: t("chatui.error"),
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -96,7 +98,7 @@ export function FinanceChatPanel() {
       setSending(false);
       inputRef.current?.focus();
     }
-  }, [messages, sending]);
+  }, [messages, sending, locale, t]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -124,7 +126,7 @@ export function FinanceChatPanel() {
                 <div className="rounded-2xl rounded-tl-sm bg-slate-50 px-4 py-3">
                   <div className="flex items-center gap-2 text-sm text-muted">
                     <Loader2 className="animate-spin" size={14} />
-                    <span className="font-bold">Analyzing your finances...</span>
+                    <span className="font-bold">{t("chatui.analyzing")}</span>
                   </div>
                 </div>
               </div>
@@ -139,12 +141,12 @@ export function FinanceChatPanel() {
         <div className="flex flex-wrap gap-2 border-t border-slate-100 px-4 py-3">
           {QUICK_PROMPTS.slice(0, 4).map((p) => (
             <button
-              key={p.label}
+              key={p.key}
               className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-muted hover:border-teal hover:text-teal transition-colors"
-              onClick={() => sendMessage(p.label)}
+              onClick={() => sendMessage(t(p.key))}
               type="button"
             >
-              {p.icon} {p.label}
+              {p.icon} {t(p.key)}
             </button>
           ))}
         </div>
@@ -157,7 +159,7 @@ export function FinanceChatPanel() {
             <textarea
               ref={inputRef}
               className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm font-medium text-ink placeholder:text-muted/60 focus:border-teal focus:bg-white focus:outline-none focus:ring-1 focus:ring-teal"
-              placeholder="Ask about your finances..."
+              placeholder={t("chatui.placeholder")}
               rows={1}
               value={input}
               onChange={(e) => {
@@ -180,7 +182,7 @@ export function FinanceChatPanel() {
         </div>
         {model && (
           <p className="mt-2 text-[11px] font-bold text-muted">
-            Powered by {model} &middot; Answers based on your real financial data
+            Powered by {model} &middot; {t("chatui.dataNote")}
           </p>
         )}
       </div>
@@ -189,26 +191,27 @@ export function FinanceChatPanel() {
 }
 
 function WelcomeScreen({ onPromptClick }: { onPromptClick: (text: string) => void }) {
+  const { t } = useI18n();
   return (
     <div className="flex h-full flex-col items-center justify-center p-8 text-center">
       <div className="grid h-16 w-16 place-items-center rounded-2xl bg-teal/10">
         <Sparkles size={28} className="text-teal" />
       </div>
-      <h3 className="mt-5 text-2xl font-black text-ink">AI Finance Assistant</h3>
+      <h3 className="mt-5 text-2xl font-black text-ink">{t("chatui.welcomeTitle")}</h3>
       <p className="mt-2 max-w-md text-sm leading-6 text-muted">
-        Ask me anything about your finances. I have access to your transactions, budgets, and saving goals to give you personalized answers.
+        {t("chatui.welcomeBody")}
       </p>
 
       <div className="mt-8 grid w-full max-w-lg gap-2 sm:grid-cols-2">
         {QUICK_PROMPTS.map((p) => (
           <button
-            key={p.label}
+            key={p.key}
             className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-bold text-ink hover:border-teal hover:bg-teal/5 transition-colors"
-            onClick={() => onPromptClick(p.label)}
+            onClick={() => onPromptClick(t(p.key))}
             type="button"
           >
             <span className="text-lg">{p.icon}</span>
-            <span>{p.label}</span>
+            <span>{t(p.key)}</span>
           </button>
         ))}
       </div>

@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/format";
+import { useI18n } from "@/lib/i18n";
 
 /* ── types ────────────────────────────────────────────────────── */
 
@@ -81,6 +82,7 @@ const fmt2 = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits:
 /* ── component ───────────────────────────────────────────────── */
 
 export function PremiumDashboard() {
+  const { t } = useI18n();
   const [dash, setDash] = useState<DashboardData | null>(null);
   const [score, setScore] = useState<HealthScore | null>(null);
   const [goals, setGoals] = useState<GoalData[]>([]);
@@ -109,7 +111,7 @@ export function PremiumDashboard() {
       <div className="flex min-h-[500px] items-center justify-center">
         <div className="text-center">
           <Loader2 className="mx-auto animate-spin text-cyan-400" size={36} />
-          <p className="mt-4 text-sm font-medium text-slate-400">Loading your financial universe…</p>
+          <p className="mt-4 text-sm font-medium text-slate-400">{t("pm.loading")}</p>
         </div>
       </div>
     );
@@ -118,7 +120,7 @@ export function PremiumDashboard() {
   if (!dash) {
     return (
       <div className="glass rounded-2xl p-8 text-center">
-        <p className="font-bold text-white/70">Unable to load dashboard data.</p>
+        <p className="font-bold text-white/70">{t("pm.loadError")}</p>
       </div>
     );
   }
@@ -132,29 +134,29 @@ export function PremiumDashboard() {
       {/* ── Row 1: KPI strip ─────────────────────────────────── */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <GlassKpi
-          label="Total Balance"
+          label={t("pm.totalBalance")}
           value={money(s.balance)}
           delta={s.monthBalance}
-          deltaLabel="this month"
+          deltaLabel={t("pm.thisMonth")}
           icon={<Wallet size={20} />}
           accent="cyan"
         />
         <GlassKpi
-          label="Monthly Income"
+          label={t("pm.monthlyIncome")}
           value={money(s.monthIncome)}
           icon={<TrendingUp size={20} />}
           accent="emerald"
         />
         <GlassKpi
-          label="Monthly Expenses"
+          label={t("pm.monthlyExpenses")}
           value={money(s.monthExpense)}
           icon={<ArrowDownRight size={20} />}
           accent="rose"
         />
         <GlassKpi
-          label="Saving Rate"
+          label={t("pm.savingRate")}
           value={`${s.savingRate}%`}
-          sub={s.savingRate >= 20 ? "On track" : "Below target"}
+          sub={s.savingRate >= 20 ? t("pm.onTrack") : t("pm.belowTarget")}
           icon={<PiggyBank size={20} />}
           accent={s.savingRate >= 20 ? "emerald" : "amber"}
         />
@@ -164,7 +166,7 @@ export function PremiumDashboard() {
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Health score */}
         <div className="glass rounded-2xl p-5">
-          <p className="text-xs font-semibold uppercase tracking-widest text-cyan-400">Financial Health</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-cyan-400">{t("pm.financialHealth")}</p>
           <div className="mt-4 flex items-center gap-5">
             <ScoreRing score={score?.totalScore ?? 0} level={score?.level ?? "N/A"} />
             <div className="flex-1 space-y-2">
@@ -191,7 +193,7 @@ export function PremiumDashboard() {
 
         {/* Level / gamification */}
         <div className="glass rounded-2xl p-5">
-          <p className="text-xs font-semibold uppercase tracking-widest text-amber-400">Your Level</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-amber-400">{t("pm.yourLevel")}</p>
           {gam ? (
             <>
               <div className="mt-4 flex items-center gap-4">
@@ -199,7 +201,7 @@ export function PremiumDashboard() {
                   <Crown size={26} />
                 </div>
                 <div>
-                  <p className="text-2xl font-black text-white">Level {gam.level.rank}</p>
+                  <p className="text-2xl font-black text-white">{t("pm.level", { rank: gam.level.rank })}</p>
                   <p className="text-sm font-medium text-amber-400/80">{gam.level.name}</p>
                 </div>
               </div>
@@ -217,33 +219,33 @@ export function PremiumDashboard() {
               </div>
               <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
                 <Star size={14} className="text-amber-400" />
-                <span>{gam.stats.unlockedCount}/{gam.stats.totalAchievements} achievements unlocked</span>
+                <span>{t("pm.achievementsUnlocked", { unlocked: gam.stats.unlockedCount, total: gam.stats.totalAchievements })}</span>
               </div>
             </>
           ) : (
-            <div className="mt-6 text-center text-sm text-slate-500">Track more to unlock levels</div>
+            <div className="mt-6 text-center text-sm text-slate-500">{t("pm.trackMore")}</div>
           )}
         </div>
 
         {/* AI Quick Insight */}
         <div className="glass rounded-2xl p-5">
-          <p className="text-xs font-semibold uppercase tracking-widest text-violet-400">AI Insights</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-violet-400">{t("pm.aiInsights")}</p>
           <div className="mt-4 flex items-start gap-3">
             <div className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-xl bg-violet-500/20 text-violet-400">
               <Bot size={20} />
             </div>
             <div>
-              <p className="text-sm font-bold text-white">Smart Summary</p>
+              <p className="text-sm font-bold text-white">{t("pm.smartSummary")}</p>
               <p className="mt-1 text-xs leading-5 text-slate-400">
                 {s.monthIncome > 0
-                  ? `You've earned ${money(s.monthIncome)} and spent ${money(s.monthExpense)} this month. ${s.savingRate >= 20 ? "Great saving discipline!" : "Consider cutting expenses to boost savings."}`
-                  : "Start tracking income to get personalized insights."}
+                  ? t("pm.summaryEarned", { income: money(s.monthIncome), expense: money(s.monthExpense), tip: s.savingRate >= 20 ? t("pm.tipGreat") : t("pm.tipCut") })
+                  : t("pm.startTracking")}
               </p>
             </div>
           </div>
           {dash.categorySpending.length > 0 && (
             <div className="mt-4 space-y-2">
-              <p className="text-xs font-medium text-slate-500">Top spending categories</p>
+              <p className="text-xs font-medium text-slate-500">{t("pm.topCategories")}</p>
               {dash.categorySpending.slice(0, 3).map((c) => (
                 <div key={c.name} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -256,7 +258,7 @@ export function PremiumDashboard() {
             </div>
           )}
           <Link href="/chat" className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-violet-400 hover:text-violet-300">
-            <Sparkles size={12} /> Ask AI Assistant
+            <Sparkles size={12} /> {t("pm.askAi")}
           </Link>
         </div>
       </div>
@@ -265,8 +267,8 @@ export function PremiumDashboard() {
       <div className="grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
         {/* Revenue chart */}
         <div className="glass rounded-2xl p-5">
-          <p className="text-xs font-semibold uppercase tracking-widest text-cyan-400">Last 6 Months</p>
-          <h3 className="mt-1 text-lg font-black text-white">Income vs Expenses</h3>
+          <p className="text-xs font-semibold uppercase tracking-widest text-cyan-400">{t("pm.last6mo")}</p>
+          <h3 className="mt-1 text-lg font-black text-white">{t("pm.incomeVsExpenses")}</h3>
           <div className="mt-4">
             <DarkBarChart data={dash.monthlyExpenses} currency={cur} />
           </div>
@@ -274,8 +276,8 @@ export function PremiumDashboard() {
 
         {/* Category donut */}
         <div className="glass rounded-2xl p-5">
-          <p className="text-xs font-semibold uppercase tracking-widest text-cyan-400">Breakdown</p>
-          <h3 className="mt-1 text-lg font-black text-white">Spending by Category</h3>
+          <p className="text-xs font-semibold uppercase tracking-widest text-cyan-400">{t("pm.breakdown")}</p>
+          <h3 className="mt-1 text-lg font-black text-white">{t("pm.spendingByCategory")}</h3>
           {dash.categorySpending.length > 0 ? (
             <div className="mt-4 flex flex-col items-center gap-4">
               <DarkDonut data={dash.categorySpending} currency={cur} />
@@ -296,7 +298,7 @@ export function PremiumDashboard() {
               </div>
             </div>
           ) : (
-            <div className="mt-8 text-center text-sm text-slate-500">No categorized expenses yet</div>
+            <div className="mt-8 text-center text-sm text-slate-500">{t("pm.noCategorized")}</div>
           )}
         </div>
       </div>
@@ -305,14 +307,14 @@ export function PremiumDashboard() {
       <div className="glass rounded-2xl p-5">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-cyan-400">30-Day Trend</p>
-            <h3 className="mt-1 text-lg font-black text-white">Spending Trajectory</h3>
+            <p className="text-xs font-semibold uppercase tracking-widest text-cyan-400">{t("pm.trend30")}</p>
+            <h3 className="mt-1 text-lg font-black text-white">{t("pm.spendingTrajectory")}</h3>
           </div>
           <div className="text-right">
             <p className="text-xl font-black text-white">
               {money(dash.spendingTrend.reduce((sum, d) => sum + d.amount, 0))}
             </p>
-            <p className="text-xs text-slate-400">total</p>
+            <p className="text-xs text-slate-400">{t("pm.total")}</p>
           </div>
         </div>
         <div className="mt-4">
@@ -326,10 +328,10 @@ export function PremiumDashboard() {
         <div className="glass rounded-2xl p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400">Saving Goals</p>
-              <h3 className="mt-1 text-lg font-black text-white">Progress</h3>
+              <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400">{t("pm.savingGoals")}</p>
+              <h3 className="mt-1 text-lg font-black text-white">{t("pm.progress")}</h3>
             </div>
-            <Link href="/goals" className="text-xs font-bold text-emerald-400 hover:text-emerald-300">View all</Link>
+            <Link href="/goals" className="text-xs font-bold text-emerald-400 hover:text-emerald-300">{t("pm.viewAll")}</Link>
           </div>
           {goals.length > 0 ? (
             <div className="mt-4 space-y-3">
@@ -358,8 +360,8 @@ export function PremiumDashboard() {
           ) : (
             <div className="mt-8 flex flex-col items-center text-center">
               <Target size={28} className="text-slate-600" />
-              <p className="mt-2 text-sm text-slate-500">No goals yet</p>
-              <Link href="/goals" className="mt-2 text-xs font-bold text-emerald-400">Create a goal</Link>
+              <p className="mt-2 text-sm text-slate-500">{t("pm.noGoals")}</p>
+              <Link href="/goals" className="mt-2 text-xs font-bold text-emerald-400">{t("pm.createGoal")}</Link>
             </div>
           )}
         </div>
@@ -368,10 +370,10 @@ export function PremiumDashboard() {
         <div className="glass rounded-2xl p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-cyan-400">Recent Activity</p>
-              <h3 className="mt-1 text-lg font-black text-white">Transactions</h3>
+              <p className="text-xs font-semibold uppercase tracking-widest text-cyan-400">{t("pm.recentActivity")}</p>
+              <h3 className="mt-1 text-lg font-black text-white">{t("pm.transactions")}</h3>
             </div>
-            <Link href="/transactions" className="text-xs font-bold text-cyan-400 hover:text-cyan-300">View all</Link>
+            <Link href="/transactions" className="text-xs font-bold text-cyan-400 hover:text-cyan-300">{t("pm.viewAll")}</Link>
           </div>
           {dash.recentTransactions.length > 0 ? (
             <div className="mt-4 space-y-1.5">
@@ -383,7 +385,7 @@ export function PremiumDashboard() {
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-bold text-white">{tx.merchant}</p>
                       <p className="text-[10px] text-slate-500">
-                        {tx.category?.name ?? "Uncategorized"} · {new Date(tx.occurredAt).toLocaleDateString("en-US", { day: "numeric", month: "short" })}
+                        {tx.category?.name ?? t("pm.uncategorized")} · {new Date(tx.occurredAt).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
                       </p>
                     </div>
                     <span className={`shrink-0 text-sm font-black ${isIncome ? "text-emerald-400" : "text-white"}`}>
@@ -394,16 +396,16 @@ export function PremiumDashboard() {
               })}
             </div>
           ) : (
-            <div className="mt-8 text-center text-sm text-slate-500">No transactions yet</div>
+            <div className="mt-8 text-center text-sm text-slate-500">{t("pm.noTx")}</div>
           )}
         </div>
       </div>
 
       {/* ── Row 6: Quick stats ───────────────────────────────── */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <MiniStat label="Total Transactions" value={String(s.txCount)} icon={<Zap size={16} />} />
-        <MiniStat label="This Month" value={String(s.monthTxCount)} icon={<Target size={16} />} />
-        <MiniStat label="Saving Goal" value={money(s.profileSavingGoal)} icon={<ShieldCheck size={16} />} />
+        <MiniStat label={t("pm.totalTransactions")} value={String(s.txCount)} icon={<Zap size={16} />} />
+        <MiniStat label={t("pm.thisMonthStat")} value={String(s.monthTxCount)} icon={<Target size={16} />} />
+        <MiniStat label={t("pm.savingGoalStat")} value={money(s.profileSavingGoal)} icon={<ShieldCheck size={16} />} />
       </div>
     </div>
   );

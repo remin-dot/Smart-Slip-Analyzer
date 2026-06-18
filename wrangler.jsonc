@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "smart-slip-analyzer",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-03-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".open-next/assets"
+  },
+  "observability": {
+    "enabled": true
+  }
+  // Secrets (DATABASE_URL, JWT_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET)
+  // are set with `wrangler secret put <NAME>` — never commit them here.
+  // Public vars can go in a "vars" block, e.g. NEXT_PUBLIC_APP_URL / GOOGLE_REDIRECT_URI.
+}

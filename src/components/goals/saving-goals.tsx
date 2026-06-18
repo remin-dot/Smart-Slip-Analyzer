@@ -19,6 +19,7 @@ import {
   Trophy,
   X,
 } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 type Feasibility = "on_track" | "tight" | "difficult" | "completed" | "overdue";
 
@@ -40,22 +41,23 @@ type Goal = {
   createdAt: string;
 };
 
-const FEASIBILITY_STYLES: Record<Feasibility, { badge: string; label: string; icon: React.ReactNode }> = {
-  on_track: { badge: "bg-mint/10 text-mint", label: "On Track", icon: <CheckCircle2 size={14} /> },
-  tight: { badge: "bg-amber/10 text-amber", label: "Tight", icon: <Clock size={14} /> },
-  difficult: { badge: "bg-coral/10 text-coral", label: "Difficult", icon: <AlertTriangle size={14} /> },
-  completed: { badge: "bg-teal/10 text-teal", label: "Completed", icon: <Trophy size={14} /> },
-  overdue: { badge: "bg-coral/10 text-coral", label: "Overdue", icon: <AlertTriangle size={14} /> },
+const FEASIBILITY_STYLES: Record<Feasibility, { badge: string; labelKey: string; icon: React.ReactNode }> = {
+  on_track: { badge: "bg-mint/10 text-mint", labelKey: "goal.onTrack", icon: <CheckCircle2 size={14} /> },
+  tight: { badge: "bg-amber/10 text-amber", labelKey: "goal.tight", icon: <Clock size={14} /> },
+  difficult: { badge: "bg-coral/10 text-coral", labelKey: "goal.difficult", icon: <AlertTriangle size={14} /> },
+  completed: { badge: "bg-teal/10 text-teal", labelKey: "goal.completed", icon: <Trophy size={14} /> },
+  overdue: { badge: "bg-coral/10 text-coral", labelKey: "goal.overdue", icon: <AlertTriangle size={14} /> },
 };
 
 const STATUS_OPTIONS = [
-  { value: "ACTIVE", label: "Active" },
-  { value: "PAUSED", label: "Paused" },
-  { value: "COMPLETED", label: "Completed" },
-  { value: "ARCHIVED", label: "Archived" },
+  { value: "ACTIVE", labelKey: "goal.statusActive" },
+  { value: "PAUSED", labelKey: "goal.statusPaused" },
+  { value: "COMPLETED", labelKey: "goal.statusCompleted" },
+  { value: "ARCHIVED", labelKey: "goal.statusArchived" },
 ];
 
 export function SavingGoals() {
+  const { t } = useI18n();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -215,7 +217,7 @@ export function SavingGoals() {
       <div className="grid min-h-[400px] place-items-center">
         <div className="text-center">
           <Loader2 className="mx-auto animate-spin text-teal" size={32} />
-          <p className="mt-3 text-sm font-bold text-muted">Loading goals...</p>
+          <p className="mt-3 text-sm font-bold text-muted">{t("goal.loading")}</p>
         </div>
       </div>
     );
@@ -227,7 +229,7 @@ export function SavingGoals() {
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="panel flex items-center justify-between p-5">
           <div>
-            <p className="text-sm font-bold text-muted">Total Target</p>
+            <p className="text-sm font-bold text-muted">{t("goal.totalTarget")}</p>
             <p className="mt-1 text-2xl font-black text-ink">{fmt(totalTarget)}</p>
             <p className="text-xs font-bold text-muted">{cur}</p>
           </div>
@@ -237,9 +239,9 @@ export function SavingGoals() {
         </div>
         <div className="panel flex items-center justify-between p-5">
           <div>
-            <p className="text-sm font-bold text-muted">Total Saved</p>
+            <p className="text-sm font-bold text-muted">{t("goal.totalSaved")}</p>
             <p className="mt-1 text-2xl font-black text-mint">{fmt(totalSaved)}</p>
-            <p className="text-xs font-bold text-muted">{overallPct}% of target</p>
+            <p className="text-xs font-bold text-muted">{t("goal.ofTarget", { pct: overallPct })}</p>
           </div>
           <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-mint/10 text-mint">
             <Coins size={20} />
@@ -247,9 +249,9 @@ export function SavingGoals() {
         </div>
         <div className="panel flex items-center justify-between p-5">
           <div>
-            <p className="text-sm font-bold text-muted">Monthly Required</p>
+            <p className="text-sm font-bold text-muted">{t("goal.monthlyRequired")}</p>
             <p className="mt-1 text-2xl font-black text-amber">{fmt(totalMonthlyRequired)}</p>
-            <p className="text-xs font-bold text-muted">{cur}/month total</p>
+            <p className="text-xs font-bold text-muted">{t("goal.perMonthTotal", { cur })}</p>
           </div>
           <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-amber/10 text-amber">
             <TrendingUp size={20} />
@@ -286,7 +288,7 @@ export function SavingGoals() {
       {otherGoals.length > 0 && (
         <div>
           <p className="mb-3 text-sm font-extrabold text-muted uppercase tracking-wider">
-            Completed &amp; Archived
+            {t("goal.completedArchived")}
           </p>
           <div className="grid gap-3">
             {otherGoals.map((g) => (
@@ -317,16 +319,16 @@ export function SavingGoals() {
         <div className="panel grid min-h-[280px] place-items-center p-8 text-center">
           <div>
             <Flag size={40} className="mx-auto text-teal" />
-            <p className="mt-4 text-xl font-black text-ink">No saving goals yet</p>
+            <p className="mt-4 text-xl font-black text-ink">{t("goal.noGoals")}</p>
             <p className="mt-2 max-w-sm text-sm leading-6 text-muted">
-              Set a goal like &quot;Buy laptop — 60,000 THB in 6 months&quot; and we&apos;ll calculate how much to save each month.
+              {t("goal.noGoalsBody")}
             </p>
             <button
               className="mt-5 inline-flex items-center gap-2 rounded-lg bg-teal px-5 py-2.5 text-sm font-extrabold text-white hover:opacity-90"
               onClick={() => setShowForm(true)}
               type="button"
             >
-              <Plus size={16} /> Create your first goal
+              <Plus size={16} /> {t("goal.createFirst")}
             </button>
           </div>
         </div>
@@ -337,7 +339,7 @@ export function SavingGoals() {
         <div ref={formRef} className="panel p-5">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-black text-ink">
-              {editingId ? "Edit Goal" : "New Saving Goal"}
+              {editingId ? t("goal.editGoal") : t("goal.newGoal")}
             </h3>
             <button
               className="grid h-8 w-8 place-items-center rounded-lg text-muted hover:bg-slate-100"
@@ -350,18 +352,18 @@ export function SavingGoals() {
 
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className="mb-1.5 block text-xs font-bold text-muted">Goal Name</label>
+              <label className="mb-1.5 block text-xs font-bold text-muted">{t("goal.goalName")}</label>
               <input
                 className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-bold text-ink focus:border-teal focus:outline-none focus:ring-1 focus:ring-teal"
                 type="text"
-                placeholder='e.g. "Buy laptop"'
+                placeholder={t("goal.goalNamePlaceholder")}
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
               />
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-bold text-muted">Target Amount</label>
+              <label className="mb-1.5 block text-xs font-bold text-muted">{t("goal.targetAmount")}</label>
               <input
                 className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-bold text-ink focus:border-teal focus:outline-none focus:ring-1 focus:ring-teal"
                 type="number"
@@ -374,7 +376,7 @@ export function SavingGoals() {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-bold text-muted">Deadline</label>
+              <label className="mb-1.5 block text-xs font-bold text-muted">{t("goal.deadline")}</label>
               <input
                 className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-bold text-ink focus:border-teal focus:outline-none focus:ring-1 focus:ring-teal"
                 type="date"
@@ -386,7 +388,7 @@ export function SavingGoals() {
             {editingId && (
               <>
                 <div>
-                  <label className="mb-1.5 block text-xs font-bold text-muted">Current Amount Saved</label>
+                  <label className="mb-1.5 block text-xs font-bold text-muted">{t("goal.currentSaved")}</label>
                   <input
                     className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-bold text-ink focus:border-teal focus:outline-none focus:ring-1 focus:ring-teal"
                     type="number"
@@ -398,7 +400,7 @@ export function SavingGoals() {
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-xs font-bold text-muted">Status</label>
+                  <label className="mb-1.5 block text-xs font-bold text-muted">{t("goal.status")}</label>
                   <div className="relative">
                     <select
                       className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2.5 pr-8 text-sm font-bold text-ink focus:border-teal focus:outline-none focus:ring-1 focus:ring-teal"
@@ -406,7 +408,7 @@ export function SavingGoals() {
                       onChange={(e) => setFormStatus(e.target.value)}
                     >
                       {STATUS_OPTIONS.map((opt) => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
                       ))}
                     </select>
                     <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted" />
@@ -435,11 +437,11 @@ export function SavingGoals() {
               type="button"
             >
               {saving ? (
-                <><Loader2 className="animate-spin" size={16} /> Saving...</>
+                <><Loader2 className="animate-spin" size={16} /> {t("goal.saving")}</>
               ) : editingId ? (
-                <><Pencil size={16} /> Update Goal</>
+                <><Pencil size={16} /> {t("goal.updateGoal")}</>
               ) : (
-                <><Plus size={16} /> Create Goal</>
+                <><Plus size={16} /> {t("goal.createGoal")}</>
               )}
             </button>
             <button
@@ -447,7 +449,7 @@ export function SavingGoals() {
               onClick={resetForm}
               type="button"
             >
-              Cancel
+              {t("goal.cancel")}
             </button>
           </div>
         </div>
@@ -460,7 +462,7 @@ export function SavingGoals() {
           onClick={() => setShowForm(true)}
           type="button"
         >
-          <Plus size={16} /> Add Saving Goal
+          <Plus size={16} /> {t("goal.addGoal")}
         </button>
       )}
     </div>
@@ -480,6 +482,7 @@ function AiPreview({
   currency: string;
   fmt: (n: number) => string;
 }) {
+  const { t } = useI18n();
   const remaining = Math.max(target - current, 0);
   const deadlineDate = new Date(deadline);
   const now = new Date();
@@ -494,7 +497,7 @@ function AiPreview({
     return (
       <div className="mt-4 flex items-start gap-3 rounded-lg bg-mint/5 border border-mint/20 px-4 py-3">
         <Trophy size={18} className="mt-0.5 shrink-0 text-mint" />
-        <p className="text-sm font-bold text-mint">Target already reached!</p>
+        <p className="text-sm font-bold text-mint">{t("goal.targetReached")}</p>
       </div>
     );
   }
@@ -502,27 +505,25 @@ function AiPreview({
   return (
     <div className="mt-4 rounded-lg bg-ocean/5 border border-ocean/20 p-4">
       <div className="flex items-center gap-2 text-sm font-extrabold text-ocean">
-        <TrendingUp size={16} /> AI Saving Calculation
+        <TrendingUp size={16} /> {t("goal.aiCalc")}
       </div>
       <div className="mt-3 grid gap-2 sm:grid-cols-3">
         <div className="rounded-lg bg-white/60 p-3 text-center">
           <p className="text-xl font-black text-ink">{fmt(monthly)}</p>
-          <p className="text-xs font-bold text-muted">{currency}/month</p>
+          <p className="text-xs font-bold text-muted">{t("goal.perMonth", { cur: currency })}</p>
         </div>
         <div className="rounded-lg bg-white/60 p-3 text-center">
           <p className="text-xl font-black text-ink">{fmt(weekly)}</p>
-          <p className="text-xs font-bold text-muted">{currency}/week</p>
+          <p className="text-xs font-bold text-muted">{t("goal.perWeek", { cur: currency })}</p>
         </div>
         <div className="rounded-lg bg-white/60 p-3 text-center">
           <p className="text-xl font-black text-ink">{fmt(daily)}</p>
-          <p className="text-xs font-bold text-muted">{currency}/day</p>
+          <p className="text-xs font-bold text-muted">{t("goal.perDay", { cur: currency })}</p>
         </div>
       </div>
       <p className="mt-3 text-xs font-bold text-muted">
-        Save <strong className="text-ink">{fmt(monthly)} {currency}/month</strong> for{" "}
-        <strong className="text-ink">{monthsLeft} month{monthsLeft !== 1 ? "s" : ""}</strong> to
-        reach your goal of {fmt(target)} {currency}.
-        {current > 0 && <> You&apos;ve already saved {fmt(current)} {currency} — {fmt(remaining)} {currency} to go.</>}
+        {t("goal.aiSummary", { amount: fmt(monthly), cur: currency, months: monthsLeft, target: fmt(target) })}
+        {current > 0 && t("goal.aiSummaryProgress", { current: fmt(current), cur: currency, remaining: fmt(remaining) })}
       </p>
     </div>
   );
@@ -559,6 +560,7 @@ function GoalCard({
   onFundAmountChange: (v: string) => void;
   onConfirmAddFunds: () => void;
 }) {
+  const { t } = useI18n();
   const f = FEASIBILITY_STYLES[g.feasibility];
   const isCompleted = g.status === "COMPLETED" || g.progressPct >= 100;
   const isPaused = g.status === "PAUSED";
@@ -587,16 +589,19 @@ function GoalCard({
               <div className="flex items-center gap-2">
                 <h4 className="font-black text-ink">{g.name}</h4>
                 <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ${f.badge}`}>
-                  {f.icon} {f.label}
+                  {f.icon} {t(f.labelKey)}
                 </span>
                 {isPaused && (
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-muted">Paused</span>
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-muted">{t("goal.paused")}</span>
                 )}
               </div>
               <p className="text-xs font-bold text-muted">
                 {g.targetDate
-                  ? <>Deadline: {new Date(g.targetDate).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })} &middot; {g.daysLeft > 0 ? `${g.daysLeft} days left` : "Overdue"}</>
-                  : "No deadline set"
+                  ? t("goal.deadlineLabel", {
+                      date: new Date(g.targetDate).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" }),
+                      left: g.daysLeft > 0 ? t("goal.daysLeft", { days: g.daysLeft }) : t("goal.overdue"),
+                    })
+                  : t("goal.noDeadline")
                 }
               </p>
             </div>
@@ -608,7 +613,7 @@ function GoalCard({
                 className="grid h-8 w-8 place-items-center rounded-lg text-mint hover:bg-mint/10"
                 onClick={onStartAddFunds}
                 type="button"
-                title="Add funds"
+                title={t("goal.addFunds")}
               >
                 <Coins size={14} />
               </button>
@@ -617,7 +622,7 @@ function GoalCard({
               className="grid h-8 w-8 place-items-center rounded-lg text-muted hover:bg-slate-100 hover:text-ink"
               onClick={onEdit}
               type="button"
-              title="Edit"
+              title={t("goal.edit")}
             >
               <Pencil size={14} />
             </button>
@@ -625,7 +630,7 @@ function GoalCard({
               className="grid h-8 w-8 place-items-center rounded-lg text-muted hover:bg-coral/10 hover:text-coral"
               onClick={onDelete}
               type="button"
-              title="Delete"
+              title={t("goal.delete")}
             >
               <Trash2 size={14} />
             </button>
@@ -650,11 +655,11 @@ function GoalCard({
             />
           </div>
           <div className="mt-2 flex justify-between text-xs font-bold">
-            <span className="text-muted">Saved: {fmt(g.currentAmount)} {g.currency}</span>
+            <span className="text-muted">{t("goal.savedLabel", { amount: fmt(g.currentAmount), cur: g.currency })}</span>
             <span className={g.remaining > 0 ? "text-ocean" : "text-teal"}>
               {g.remaining > 0
-                ? `${fmt(g.remaining)} ${g.currency} to go`
-                : "Goal reached!"
+                ? t("goal.toGo", { amount: fmt(g.remaining), cur: g.currency })
+                : t("goal.goalReached")
               }
             </span>
           </div>
@@ -666,10 +671,10 @@ function GoalCard({
             <CalendarClock size={16} className="mt-0.5 shrink-0 text-ocean" />
             <div className="text-xs font-bold leading-5">
               <span className="text-ink">
-                Save {fmt(g.monthlySavingRequired)} {g.currency}/month
+                {t("goal.saveMonthly", { amount: fmt(g.monthlySavingRequired), cur: g.currency })}
               </span>
               <span className="text-muted">
-                {" "}for {g.monthsLeft} month{g.monthsLeft !== 1 ? "s" : ""} to reach your target
+                {t("goal.forMonths", { months: g.monthsLeft })}
               </span>
             </div>
           </div>
@@ -679,7 +684,7 @@ function GoalCard({
           <div className="mt-3 flex items-start gap-2 rounded-lg bg-teal/5 border border-teal/20 px-4 py-3">
             <Trophy size={16} className="mt-0.5 shrink-0 text-teal" />
             <p className="text-xs font-bold leading-5 text-teal">
-              Congratulations! You&apos;ve reached your saving goal!
+              {t("goal.congrats")}
             </p>
           </div>
         )}
@@ -688,7 +693,7 @@ function GoalCard({
           <div className="mt-3 flex items-start gap-2 rounded-lg bg-coral/5 border border-coral/20 px-4 py-3">
             <AlertTriangle size={16} className="mt-0.5 shrink-0 text-coral" />
             <p className="text-xs font-bold leading-5 text-coral">
-              This goal is past its deadline. Still {fmt(g.remaining)} {g.currency} to go — consider extending the date or adjusting the target.
+              {t("goal.overdueMsg", { amount: fmt(g.remaining), cur: g.currency })}
             </p>
           </div>
         )}
@@ -703,7 +708,7 @@ function GoalCard({
             type="number"
             min="1"
             step="100"
-            placeholder="Amount"
+            placeholder={t("goal.amountPlaceholder")}
             value={fundAmount}
             onChange={(e) => onFundAmountChange(e.target.value)}
             autoFocus
@@ -714,14 +719,14 @@ function GoalCard({
             onClick={onConfirmAddFunds}
             type="button"
           >
-            {fundSaving ? "Saving..." : "Add Funds"}
+            {fundSaving ? t("goal.saving") : t("goal.addFundsBtn")}
           </button>
           <button
             className="text-xs font-extrabold text-muted hover:text-ink"
             onClick={onCancelAddFunds}
             type="button"
           >
-            Cancel
+            {t("goal.cancel")}
           </button>
         </div>
       )}
@@ -729,21 +734,21 @@ function GoalCard({
       {/* Delete confirmation */}
       {isDeleting && (
         <div className="flex items-center justify-between border-t border-coral/20 bg-coral/5 px-5 py-3">
-          <p className="text-sm font-bold text-coral">Delete this goal?</p>
+          <p className="text-sm font-bold text-coral">{t("goal.deleteGoalConfirm")}</p>
           <div className="flex items-center gap-2">
             <button
               className="rounded-lg px-3 py-1.5 text-xs font-extrabold text-muted hover:bg-white"
               onClick={onCancelDelete}
               type="button"
             >
-              Cancel
+              {t("goal.cancel")}
             </button>
             <button
               className="rounded-lg bg-coral px-3 py-1.5 text-xs font-extrabold text-white hover:opacity-90"
               onClick={onConfirmDelete}
               type="button"
             >
-              Delete
+              {t("goal.delete")}
             </button>
           </div>
         </div>

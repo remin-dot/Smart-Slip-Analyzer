@@ -10,6 +10,7 @@ import {
   TrendingUp,
   Wallet,
 } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 type PredictedMonth = {
   month: string;
@@ -51,15 +52,16 @@ type Prediction = {
 type Data = { prediction: Prediction; currency: string };
 
 export function FinancialPredictions() {
+  const { t } = useI18n();
   const [data, setData] = useState<Data | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     fetch("/api/ai/predictions")
       .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
       .then(setData)
-      .catch(() => setError("Could not load predictions."))
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -67,13 +69,13 @@ export function FinancialPredictions() {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-muted">
         <Loader2 className="animate-spin" size={32} />
-        <p className="mt-3 text-sm font-bold">Crunching your financial future…</p>
+        <p className="mt-3 text-sm font-bold">{t("pred.loading")}</p>
       </div>
     );
   }
 
   if (error || !data) {
-    return <div className="panel p-6 text-center text-coral font-bold">{error || "No data"}</div>;
+    return <div className="panel p-6 text-center text-coral font-bold">{t("pred.noData")}</div>;
   }
 
   const { prediction: p, currency } = data;
@@ -83,22 +85,24 @@ export function FinancialPredictions() {
     : p.spendingTrend.direction === "decreasing" ? ArrowDown : ArrowRight;
   const trendColor = p.spendingTrend.direction === "increasing" ? "#d85c46"
     : p.spendingTrend.direction === "decreasing" ? "#20875a" : "#cf8b21";
+  const trendLabel = p.spendingTrend.direction === "increasing" ? t("pred.trendIncreasing")
+    : p.spendingTrend.direction === "decreasing" ? t("pred.trendDecreasing") : t("pred.trendStable");
 
   return (
     <div className="space-y-6">
       {/* KPI cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KpiCard label="End-of-Month Balance" value={`${fmt(p.endOfMonthBalance)} ${currency}`} icon={<Wallet size={18} />} color="#087f7a" />
-        <KpiCard label="Projected Saving" value={`${fmt(p.projectedSaving)} ${currency}`} sub={`${p.savingRate}% saving rate`} icon={<TrendingUp size={18} />} color={p.projectedSaving >= 0 ? "#20875a" : "#d85c46"} />
-        <KpiCard label="Projected Expense" value={`${fmt(p.endOfMonthExpense)} ${currency}`} icon={<TrendingDown size={18} />} color="#2855a3" />
-        <KpiCard label="Spending Trend" value={p.spendingTrend.direction.charAt(0).toUpperCase() + p.spendingTrend.direction.slice(1)} sub={`${fmt(Math.abs(p.spendingTrend.avgMonthlyChange))} ${currency}/mo`} icon={<TrendIcon size={18} />} color={trendColor} />
+        <KpiCard label={t("pred.endBalance")} value={`${fmt(p.endOfMonthBalance)} ${currency}`} icon={<Wallet size={18} />} color="#087f7a" />
+        <KpiCard label={t("pred.projectedSaving")} value={`${fmt(p.projectedSaving)} ${currency}`} sub={t("pred.savingRateSub", { pct: p.savingRate })} icon={<TrendingUp size={18} />} color={p.projectedSaving >= 0 ? "#20875a" : "#d85c46"} />
+        <KpiCard label={t("pred.projectedExpense")} value={`${fmt(p.endOfMonthExpense)} ${currency}`} icon={<TrendingDown size={18} />} color="#2855a3" />
+        <KpiCard label={t("pred.spendingTrend")} value={trendLabel} sub={t("pred.perMo", { amount: fmt(Math.abs(p.spendingTrend.avgMonthlyChange)), cur: currency })} icon={<TrendIcon size={18} />} color={trendColor} />
       </div>
 
       {/* Balance forecast chart */}
       {p.predictedMonths.length > 0 && (
         <div className="panel p-5">
-          <p className="eyebrow">6-month forecast</p>
-          <h3 className="mt-1 text-lg font-black text-ink">Balance Projection</h3>
+          <p className="eyebrow">{t("pred.forecast6mo")}</p>
+          <h3 className="mt-1 text-lg font-black text-ink">{t("pred.balanceProjection")}</h3>
           <div className="mt-4 overflow-x-auto">
             <BalanceChart months={p.predictedMonths} currency={currency} />
           </div>
@@ -107,8 +111,8 @@ export function FinancialPredictions() {
 
       {/* Scenarios */}
       <div className="panel p-5">
-        <p className="eyebrow">Future scenarios</p>
-        <h3 className="mt-1 text-lg font-black text-ink">What Could Happen in 6 Months</h3>
+        <p className="eyebrow">{t("pred.futureScenarios")}</p>
+        <h3 className="mt-1 text-lg font-black text-ink">{t("pred.whatCould")}</h3>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           {p.scenarios.map((s) => (
             <ScenarioCard key={s.type} scenario={s} currency={currency} />
@@ -119,8 +123,8 @@ export function FinancialPredictions() {
       {/* Scenario comparison chart */}
       {p.scenarios.length > 0 && (
         <div className="panel p-5">
-          <p className="eyebrow">Scenario comparison</p>
-          <h3 className="mt-1 text-lg font-black text-ink">Balance Across Scenarios</h3>
+          <p className="eyebrow">{t("pred.scenarioComparison")}</p>
+          <h3 className="mt-1 text-lg font-black text-ink">{t("pred.balanceAcross")}</h3>
           <div className="mt-4 overflow-x-auto">
             <ScenarioChart scenarios={p.scenarios} currency={currency} />
           </div>
@@ -130,8 +134,8 @@ export function FinancialPredictions() {
       {/* Insights */}
       {p.insights.length > 0 && (
         <div className="panel p-5">
-          <p className="eyebrow">AI insights</p>
-          <h3 className="mt-1 text-lg font-black text-ink">Key Takeaways</h3>
+          <p className="eyebrow">{t("pred.aiInsights")}</p>
+          <h3 className="mt-1 text-lg font-black text-ink">{t("pred.keyTakeaways")}</h3>
           <ul className="mt-3 space-y-2">
             {p.insights.map((ins, i) => (
               <li key={i} className="flex items-start gap-2 text-sm leading-6 text-muted">
@@ -145,8 +149,8 @@ export function FinancialPredictions() {
 
       {/* Spending trend explanation */}
       <div className="panel p-5">
-        <p className="eyebrow">Trend analysis</p>
-        <h3 className="mt-1 text-lg font-black text-ink">Spending Trajectory</h3>
+        <p className="eyebrow">{t("pred.trendAnalysis")}</p>
+        <h3 className="mt-1 text-lg font-black text-ink">{t("pred.spendingTrajectory")}</h3>
         <p className="mt-3 text-sm leading-7 text-muted">{p.spendingTrend.explanation}</p>
       </div>
     </div>
@@ -170,6 +174,7 @@ const SCENARIO_STYLE: Record<string, { color: string; bg: string }> = {
 };
 
 function ScenarioCard({ scenario: s, currency }: { scenario: Scenario; currency: string }) {
+  const { t } = useI18n();
   const fmt = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 0 });
   const style = SCENARIO_STYLE[s.type];
 
@@ -178,7 +183,9 @@ function ScenarioCard({ scenario: s, currency }: { scenario: Scenario; currency:
       <p className="text-xs font-extrabold uppercase tracking-wider" style={{ color: style.color }}>{s.name}</p>
       <p className="mt-3 text-2xl font-black text-ink">{fmt(s.endBalance)} <span className="text-sm text-muted">{currency}</span></p>
       <p className="mt-1 text-sm text-muted">
-        {s.totalSaving >= 0 ? "Save" : "Lose"} {fmt(Math.abs(s.totalSaving))} {currency} total
+        {s.totalSaving >= 0
+          ? t("pred.saveTotal", { amount: fmt(Math.abs(s.totalSaving)), cur: currency })
+          : t("pred.loseTotal", { amount: fmt(Math.abs(s.totalSaving)), cur: currency })}
       </p>
       <p className="mt-3 text-xs leading-5 text-muted">{s.description}</p>
     </div>
@@ -189,6 +196,7 @@ function ScenarioCard({ scenario: s, currency }: { scenario: Scenario; currency:
 const W = 600, H = 220, PL = 60, PR = 20, PT = 20, PB = 40;
 
 function BalanceChart({ months, currency }: { months: PredictedMonth[]; currency: string }) {
+  const { t } = useI18n();
   const fmt = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 0 });
 
   if (months.length === 0) return null;
@@ -275,9 +283,9 @@ function BalanceChart({ months, currency }: { months: PredictedMonth[]; currency
 
       {/* legend */}
       <circle cx={PL} cy={H - 6} r={4} fill="#087f7a" />
-      <text x={PL + 8} y={H - 3} fontSize={9} className="fill-muted">Actual</text>
+      <text x={PL + 8} y={H - 3} fontSize={9} className="fill-muted">{t("pred.actual")}</text>
       <circle cx={PL + 55} cy={H - 6} r={4} fill="#2855a3" />
-      <text x={PL + 63} y={H - 3} fontSize={9} className="fill-muted">Predicted</text>
+      <text x={PL + 63} y={H - 3} fontSize={9} className="fill-muted">{t("pred.predicted")}</text>
     </svg>
   );
 }
