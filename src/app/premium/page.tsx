@@ -11,7 +11,7 @@ export default async function PremiumPage() {
   }
 
   return (
-    <AppShell active="premium" user={{ name: user.name, email: user.email }} dark>
+    <AppShell active="premium" user={{ name: user.name, email: user.email, image: user.imageUrl }} dark>
       <PremiumDashboard />
     </AppShell>
   );

@@ -11,7 +11,7 @@ export default async function PurchasePage() {
   }
 
   return (
-    <AppShell active="purchase" user={{ name: user.name, email: user.email }}>
+    <AppShell active="purchase" user={{ name: user.name, email: user.email, image: user.imageUrl }}>
       <PurchaseAdvisor />
     </AppShell>
   );

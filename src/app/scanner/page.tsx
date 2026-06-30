@@ -11,7 +11,7 @@ export default async function ScannerPage() {
   }
 
   return (
-    <AppShell active="scanner" user={{ name: user.name, email: user.email }}>
+    <AppShell active="scanner" user={{ name: user.name, email: user.email, image: user.imageUrl }}>
       <SlipUpload />
     </AppShell>
   );

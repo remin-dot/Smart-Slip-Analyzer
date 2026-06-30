@@ -1,24 +1,24 @@
 "use client";
 
 import {
-  ChartNoAxesCombined,
   CircleDollarSign,
-  Crown,
   FileScan,
   Flag,
   Landmark,
   LayoutDashboard,
   MessageCircle,
+  PanelLeft,
   PiggyBank,
   Repeat,
   ShieldCheck,
   ShoppingCart,
   Star,
   TrendingUp,
-  UserRound,
+  X,
 } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
+import { useState } from "react";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { CurrencySwitcher } from "@/components/currency-switcher";
 import { LangSwitcher } from "@/components/lang-switcher";
@@ -29,22 +29,44 @@ export type PageKey =
   | "chat" | "purchase" | "subscriptions" | "predictions" | "wealth"
   | "achievements" | "premium" | "profile";
 
-const NAV: { key: PageKey | "analytics"; href: Route; Icon: typeof LayoutDashboard }[] = [
-  { key: "dashboard", href: "/dashboard", Icon: LayoutDashboard },
-  { key: "scanner", href: "/scanner", Icon: FileScan },
-  { key: "transactions", href: "/transactions", Icon: CircleDollarSign },
-  { key: "budgets", href: "/budgets", Icon: PiggyBank },
-  { key: "goals", href: "/goals", Icon: Flag },
-  { key: "chat", href: "/chat", Icon: MessageCircle },
-  { key: "purchase", href: "/purchase", Icon: ShoppingCart },
-  { key: "subscriptions", href: "/subscriptions", Icon: Repeat },
-  { key: "predictions", href: "/predictions", Icon: TrendingUp },
-  { key: "wealth", href: "/wealth", Icon: Landmark },
-  { key: "achievements", href: "/achievements", Icon: Star },
-  { key: "premium", href: "/premium", Icon: Crown },
-  { key: "analytics", href: "/dashboard#analytics", Icon: ChartNoAxesCombined },
-  { key: "profile", href: "/profile", Icon: UserRound },
+type NavItem = { key: PageKey; href: Route; Icon: typeof LayoutDashboard };
+
+// Grouped so the long flat list reads as a few scannable sections.
+const NAV_GROUPS: { labelKey: string; items: NavItem[] }[] = [
+  {
+    labelKey: "shell.grpOverview",
+    items: [{ key: "dashboard", href: "/dashboard", Icon: LayoutDashboard }],
+  },
+  {
+    labelKey: "shell.grpSpending",
+    items: [
+      { key: "scanner", href: "/scanner", Icon: FileScan },
+      { key: "transactions", href: "/transactions", Icon: CircleDollarSign },
+      { key: "budgets", href: "/budgets", Icon: PiggyBank },
+      { key: "subscriptions", href: "/subscriptions", Icon: Repeat },
+    ],
+  },
+  {
+    labelKey: "shell.grpGrowth",
+    items: [
+      { key: "goals", href: "/goals", Icon: Flag },
+      { key: "wealth", href: "/wealth", Icon: Landmark },
+      { key: "predictions", href: "/predictions", Icon: TrendingUp },
+    ],
+  },
+  {
+    labelKey: "shell.grpAssistant",
+    items: [
+      { key: "chat", href: "/chat", Icon: MessageCircle },
+      { key: "purchase", href: "/purchase", Icon: ShoppingCart },
+      { key: "achievements", href: "/achievements", Icon: Star },
+    ],
+  },
 ];
+
+function initials(name: string) {
+  return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "?";
+}
 
 export function AppShell({
   active,
@@ -54,12 +76,13 @@ export function AppShell({
   children,
 }: {
   active: PageKey;
-  user: { name: string; email: string };
+  user: { name: string; email: string; image?: string | null };
   titleSuffix?: string;
   dark?: boolean;
   children: React.ReactNode;
 }) {
   const { t } = useI18n();
+  const [open, setOpen] = useState(true);
 
   // Airbnb is a light, white-canvas system; `dark` keeps the premium page's theme.
   const asideCls = dark
@@ -68,52 +91,113 @@ export function AppShell({
 
   return (
     <main className={`min-h-screen ${dark ? "bg-[#0a0f1a]" : "bg-white"}`}>
-      <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
-        <aside className={`flex flex-col gap-6 p-5 lg:sticky lg:top-0 lg:h-screen ${asideCls}`}>
-          <Link className="flex items-center gap-3" href="/">
-            <div className="grid h-10 w-10 place-items-center rounded-full bg-rausch text-lg font-bold text-white">S</div>
-            <div>
-              <p className="font-semibold leading-5">Smart Slip</p>
-              <p className={`text-sm ${dark ? "text-white/55" : "text-muted"}`}>Analyzer</p>
+      {/* Backdrop — only below lg, where the sidebar overlays content. */}
+      {open && (
+        <button
+          aria-label="Close menu"
+          onClick={() => setOpen(false)}
+          className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm lg:hidden"
+        />
+      )}
+
+      <aside
+        className={`fixed left-0 top-0 z-40 flex h-screen w-[280px] flex-col gap-6 p-5 transition-transform duration-300 ease-out ${asideCls} ${
+          open ? "translate-x-0 shadow-2xl lg:shadow-none" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between gap-2">
+          <Link
+            href={"/profile" as Route}
+            className={`flex min-w-0 items-center gap-3 rounded-2xl p-1.5 pr-3 transition-colors ${
+              dark ? "hover:bg-white/5" : "hover:bg-surface"
+            }`}
+          >
+            {user.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={user.image}
+                alt={user.name}
+                className="h-11 w-11 shrink-0 rounded-full object-cover ring-2 ring-rausch/30"
+              />
+            ) : (
+              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-rausch text-base font-bold text-white ring-2 ring-rausch/20">
+                {initials(user.name)}
+              </div>
+            )}
+            <div className="min-w-0">
+              <p className="truncate font-semibold leading-5">{user.name}</p>
+              <p className={`truncate text-sm leading-5 ${dark ? "text-white/55" : "text-muted"}`}>{user.email}</p>
             </div>
           </Link>
+          <button
+            aria-label="Collapse menu"
+            onClick={() => setOpen(false)}
+            className={`grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors ${
+              dark ? "text-white/60 hover:bg-white/10" : "text-muted hover:bg-surface"
+            }`}
+          >
+            <X size={18} />
+          </button>
+        </div>
 
-          <nav className="grid gap-1 text-[15px] font-medium">
-            {NAV.map(({ key, href, Icon }) => {
-              const isActive = key === active;
-              const cls = dark
-                ? isActive
-                  ? "bg-white/10 text-white"
-                  : "text-white/55 hover:bg-white/5 hover:text-white/80"
-                : isActive
-                  ? "bg-rausch/10 text-rausch"
-                  : "text-body hover:bg-surface hover:text-ink";
-              return (
-                <Link key={key} href={href} className={`flex items-center gap-3 rounded-full px-3.5 py-2.5 ${cls}`}>
-                  <Icon size={18} /> {t(`nav.${key}`)}
-                </Link>
-              );
-            })}
-          </nav>
+        <nav className="grid gap-5 overflow-y-auto text-[15px] font-medium">
+          {NAV_GROUPS.map((group) => (
+            <div key={group.labelKey} className="grid gap-1">
+              <p className={`px-3.5 pb-0.5 text-[11px] font-bold uppercase tracking-wider ${dark ? "text-white/35" : "text-muted"}`}>
+                {t(group.labelKey)}
+              </p>
+              {group.items.map(({ key, href, Icon }) => {
+                const isActive = key === active;
+                const cls = dark
+                  ? isActive
+                    ? "bg-white/10 text-white"
+                    : "text-white/55 hover:bg-white/5 hover:text-white/80"
+                  : isActive
+                    ? "bg-rausch/10 text-rausch"
+                    : "text-body hover:bg-surface hover:text-ink";
+                return (
+                  <Link key={key} href={href} className={`flex items-center gap-3 rounded-full px-3.5 py-2.5 transition-colors ${cls}`}>
+                    <Icon size={18} /> {t(`nav.${key}`)}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
+        </nav>
 
-          <div className="mt-auto grid gap-2">
-            <LangSwitcher />
-            <CurrencySwitcher />
-            <div className={`rounded-2xl p-4 ${dark ? "border border-white/10 bg-white/5" : "border border-hairline bg-surface"}`}>
-              <div className={`flex items-center gap-2 text-sm font-semibold ${dark ? "text-white/55" : "text-muted"}`}>
-                <ShieldCheck size={17} className="text-rausch" /> {t("shell.protected")}
-              </div>
-              <p className="mt-3 text-lg font-semibold">{user.name}</p>
-              <p className={`mt-0.5 text-sm leading-5 ${dark ? "text-white/45" : "text-muted"}`}>{user.email}</p>
-              <div className="mt-3">
-                <LogoutButton />
-              </div>
+        <div className="mt-auto grid gap-2">
+          <LangSwitcher />
+          <CurrencySwitcher />
+          <div className={`rounded-2xl p-4 ${dark ? "border border-white/10 bg-white/5" : "border border-hairline bg-surface"}`}>
+            <div className={`flex items-center gap-2 text-sm font-semibold ${dark ? "text-white/55" : "text-muted"}`}>
+              <ShieldCheck size={17} className="text-rausch" /> {t("shell.protected")}
+            </div>
+            <div className="mt-3">
+              <LogoutButton />
             </div>
           </div>
-        </aside>
+        </div>
+      </aside>
 
-        <section className="mx-auto w-full max-w-[1440px] p-5 sm:p-8">
-          <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* Content shifts right on lg when the sidebar is open; slides under it on smaller screens. */}
+      <section
+        className={`mx-auto w-full max-w-[1440px] p-5 transition-[padding] duration-300 ease-out sm:p-8 ${
+          open ? "lg:pl-[300px]" : "lg:pl-8"
+        }`}
+      >
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-start gap-3">
+            {!open && (
+              <button
+                aria-label="Open menu"
+                onClick={() => setOpen(true)}
+                className={`grid h-11 w-11 shrink-0 place-items-center rounded-full border transition-colors ${
+                  dark ? "border-white/10 text-white hover:bg-white/10" : "border-hairline text-ink hover:bg-surface"
+                }`}
+              >
+                <PanelLeft size={18} />
+              </button>
+            )}
             <div>
               <p className={dark ? "text-xs font-bold uppercase tracking-wide text-rausch" : "eyebrow"}>
                 {t(`${active}.eyebrow`)}
@@ -125,19 +209,19 @@ export function AppShell({
                 {t(`${active}.subtitle`)}
               </p>
             </div>
-            {active !== "dashboard" && (
-              <Link
-                className="inline-flex items-center gap-2 rounded-lg border border-ink bg-white px-5 py-3 text-sm font-medium text-ink hover:bg-surface"
-                href="/dashboard"
-              >
-                <LayoutDashboard size={16} /> {t("nav.dashboard")}
-              </Link>
-            )}
-          </header>
+          </div>
+          {active !== "dashboard" && (
+            <Link
+              className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-ink bg-white px-5 py-3 text-sm font-medium text-ink hover:bg-surface"
+              href="/dashboard"
+            >
+              <LayoutDashboard size={16} /> {t("nav.dashboard")}
+            </Link>
+          )}
+        </header>
 
-          <section className="mt-6">{children}</section>
-        </section>
-      </div>
+        <section className="mt-6">{children}</section>
+      </section>
     </main>
   );
 }

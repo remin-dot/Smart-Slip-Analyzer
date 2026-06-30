@@ -11,7 +11,7 @@ export default async function WealthPage() {
   }
 
   return (
-    <AppShell active="wealth" user={{ name: user.name, email: user.email }}>
+    <AppShell active="wealth" user={{ name: user.name, email: user.email, image: user.imageUrl }}>
       <WealthTracker />
     </AppShell>
   );

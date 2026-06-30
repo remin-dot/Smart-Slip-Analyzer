@@ -1,7 +1,6 @@
 "use client";
 
 import { Coins } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CURRENCIES } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
@@ -10,7 +9,6 @@ import { useI18n } from "@/lib/i18n";
 // kept fully separate from the language switcher. Changing it PATCHes the profile
 // and refreshes so all displayed amounts re-label.
 export function CurrencySwitcher() {
-  const router = useRouter();
   const { t } = useI18n();
   const [currency, setCurrency] = useState<string>("USD");
   const [saving, setSaving] = useState(false);
@@ -31,7 +29,9 @@ export function CurrencySwitcher() {
       body: JSON.stringify({ currency: next }),
     }).catch(() => {});
     setSaving(false);
-    router.refresh();
+    // Full reload: every money amount lives in client components that fetch on
+    // mount, so router.refresh() (server-only) would leave them stale.
+    window.location.reload();
   }
 
   return (

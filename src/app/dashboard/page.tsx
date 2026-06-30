@@ -11,7 +11,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <AppShell active="dashboard" user={{ name: user.name, email: user.email }} titleSuffix={user.name}>
+    <AppShell active="dashboard" user={{ name: user.name, email: user.email, image: user.imageUrl }} titleSuffix={user.name}>
       <div id="analytics">
         <AnalyticsDashboard />
       </div>

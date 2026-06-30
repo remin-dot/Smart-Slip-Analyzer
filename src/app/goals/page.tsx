@@ -11,7 +11,7 @@ export default async function GoalsPage() {
   }
 
   return (
-    <AppShell active="goals" user={{ name: user.name, email: user.email }}>
+    <AppShell active="goals" user={{ name: user.name, email: user.email, image: user.imageUrl }}>
       <SavingGoals />
     </AppShell>
   );

@@ -641,7 +641,7 @@ function TableRow({
             </button>
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+          <span className="inline-flex items-center gap-1">
             <button
               className="rounded p-1.5 text-muted hover:bg-slate-100 hover:text-ink"
               onClick={onEdit}

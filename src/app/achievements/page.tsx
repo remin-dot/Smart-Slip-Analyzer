@@ -11,7 +11,7 @@ export default async function AchievementsPage() {
   }
 
   return (
-    <AppShell active="achievements" user={{ name: user.name, email: user.email }}>
+    <AppShell active="achievements" user={{ name: user.name, email: user.email, image: user.imageUrl }}>
       <GamificationPanel />
     </AppShell>
   );

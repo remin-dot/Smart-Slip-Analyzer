@@ -57,25 +57,25 @@ export function ProfileForm({ user }: ProfileFormProps) {
   return (
     <form className="grid gap-5" onSubmit={onSubmit}>
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="grid gap-2 text-sm font-extrabold">
+        <label className="grid gap-2 min-w-0 text-sm font-extrabold">
           {t("auth.name")}
           <input className="rounded-lg border border-slate-200 px-4 py-3 font-semibold outline-none focus:border-teal" name="name" defaultValue={user.name} required />
         </label>
-        <label className="grid gap-2 text-sm font-extrabold">
+        <label className="grid gap-2 min-w-0 text-sm font-extrabold">
           {t("auth.email")}
           <input className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 font-semibold text-muted" value={user.email} disabled />
         </label>
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
-        <label className="grid gap-2 text-sm font-extrabold">
+        <label className="grid gap-2 min-w-0 text-sm font-extrabold">
           {t("auth.monthlyIncome")}
           <input className="rounded-lg border border-slate-200 px-4 py-3 font-semibold outline-none focus:border-teal" name="monthlyIncome" type="number" min="0" defaultValue={user.monthlyIncome} />
         </label>
-        <label className="grid gap-2 text-sm font-extrabold">
+        <label className="grid gap-2 min-w-0 text-sm font-extrabold">
           {t("auth.savingGoal")}
           <input className="rounded-lg border border-slate-200 px-4 py-3 font-semibold outline-none focus:border-teal" name="savingGoal" type="number" min="0" defaultValue={user.savingGoal} />
         </label>
-        <label className="grid gap-2 text-sm font-extrabold">
+        <label className="grid gap-2 min-w-0 text-sm font-extrabold">
           {t("auth.currency")}
           <select className="rounded-lg border border-slate-200 px-4 py-3 font-semibold outline-none focus:border-teal" name="currency" defaultValue={user.currency}>
             {CURRENCIES.map((c) => (
@@ -86,7 +86,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
           </select>
         </label>
       </div>
-      <label className="grid gap-2 text-sm font-extrabold">
+      <label className="grid gap-2 min-w-0 text-sm font-extrabold">
         {t("auth.financialPreference")}
         <select className="rounded-lg border border-slate-200 px-4 py-3 font-semibold outline-none focus:border-teal" name="financialPreference" defaultValue={user.financialPreference}>
           <option value="CONSERVATIVE">{t("auth.conservative")}</option>

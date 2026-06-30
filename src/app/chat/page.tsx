@@ -11,7 +11,7 @@ export default async function ChatPage() {
   }
 
   return (
-    <AppShell active="chat" user={{ name: user.name, email: user.email }}>
+    <AppShell active="chat" user={{ name: user.name, email: user.email, image: user.imageUrl }}>
       <FinanceChatPanel />
     </AppShell>
   );

@@ -1,3 +1,4 @@
+import { randomBytes, createHash } from "crypto";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { SignJWT, jwtVerify } from "jose";
@@ -5,7 +6,19 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 
 const SESSION_COOKIE = "ssa_session";
-export const GOOGLE_OAUTH_STATE_COOKIE = "ssa_google_oauth_state";
+
+export const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+// Caller emails the raw token; we only ever store its hash, so a DB leak can't
+// be replayed as a reset link.
+export function generateResetToken() {
+  const token = randomBytes(32).toString("hex");
+  return { token, tokenHash: hashResetToken(token) };
+}
+
+export function hashResetToken(token: string) {
+  return createHash("sha256").update(token).digest("hex");
+}
 
 function getJwtSecret() {
   const secret = process.env.JWT_SECRET;

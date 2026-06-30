@@ -11,7 +11,7 @@ export default async function TransactionsPage() {
   }
 
   return (
-    <AppShell active="transactions" user={{ name: user.name, email: user.email }}>
+    <AppShell active="transactions" user={{ name: user.name, email: user.email, image: user.imageUrl }}>
       <TransactionList />
     </AppShell>
   );

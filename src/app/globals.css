@@ -27,6 +27,44 @@ textarea {
   font: inherit;
 }
 
+/* Let form controls shrink inside grid/flex cells instead of forcing the row
+   wider than its container (a long <select> option otherwise overflows). */
+input,
+select,
+textarea {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Money/number fields: drop the clunky native up/down steppers for a clean,
+   typed-input look (applies to monthly income, saving goal, amounts, etc.). */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Selects: replace the browser's chunky native arrow (Safari shows the same
+   ⇕ stepper as number inputs) with one clean, consistent chevron. */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23717171' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='4 6 8 10 12 6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  background-size: 0.9rem;
+}
+/* `select[class]` (specificity 0,1,1) beats Tailwind's `.px-*` so there is
+   always room for the chevron, regardless of each select's padding utility. */
+select[class] {
+  padding-right: 2.25rem;
+}
+
 @layer components {
   /* Airbnb card: white surface, hairline border, soft 14px rounding, one shadow tier. */
   .panel {

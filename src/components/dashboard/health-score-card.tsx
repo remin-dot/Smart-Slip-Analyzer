@@ -15,21 +15,27 @@ import { useI18n } from "@/lib/i18n";
 
 type ScoreLevel = "Poor" | "Average" | "Good" | "Excellent";
 
+type Params = Record<string, string | number>;
+
 type ScoreFactor = {
   name: string;
+  nameKey: string;
   score: number;
   maxScore: number;
   weight: number;
   level: ScoreLevel;
-  description: string;
-  tip: string;
+  descKey: string;
+  descParams?: Params;
+  descExtraKey?: string;
+  descExtraParams?: Params;
+  tipKey: string;
+  tipParams?: Params;
 };
 
 type HealthScore = {
   totalScore: number;
   level: ScoreLevel;
   factors: ScoreFactor[];
-  summary: string;
   modelName: string;
 };
 
@@ -95,6 +101,14 @@ export function HealthScoreCard() {
   const circumference = 2 * Math.PI * 54;
   const strokeDash = (data.totalScore / 100) * circumference;
 
+  const best = data.factors.reduce((a, b) => (a.score > b.score ? a : b));
+  const worst = data.factors.reduce((a, b) => (a.score < b.score ? a : b));
+  const summary =
+    t("health.summaryScore", { score: data.totalScore, level: t(LEVEL_LABEL_KEYS[data.level]) }) +
+    (best.score > worst.score
+      ? ` ${t("health.summaryAreas", { best: t(best.nameKey), worst: t(worst.nameKey) })}`
+      : "");
+
   return (
     <article className="panel overflow-hidden">
       <div className="p-5">
@@ -150,7 +164,7 @@ export function HealthScoreCard() {
                       <span className={factorColors.text}>
                         {FACTOR_ICONS[factor.name] ?? <Activity size={16} />}
                       </span>
-                      <span className="font-bold text-ink">{factor.name}</span>
+                      <span className="font-bold text-ink">{t(factor.nameKey)}</span>
                       <span className="text-[11px] font-bold text-muted">({factor.weight}%)</span>
                     </div>
                     <span className={`font-extrabold ${factorColors.text}`}>{factor.score}</span>
@@ -170,8 +184,8 @@ export function HealthScoreCard() {
           </div>
         </div>
 
-        {/* Summary */}
-        <p className="mt-5 text-sm font-bold leading-6 text-muted">{data.summary}</p>
+        {/* Summary — composed client-side so it translates with the locale. */}
+        <p className="mt-5 text-sm font-bold leading-6 text-muted">{summary}</p>
       </div>
 
       {/* Expandable details */}
@@ -201,15 +215,18 @@ export function HealthScoreCard() {
                     <span className={factorColors.text}>
                       {FACTOR_ICONS[factor.name] ?? <Activity size={16} />}
                     </span>
-                    <h4 className="font-black text-ink">{factor.name}</h4>
+                    <h4 className="font-black text-ink">{t(factor.nameKey)}</h4>
                     <span className={`ml-auto rounded-full px-2 py-0.5 text-[11px] font-bold ${factorColors.badge}`}>
                       {t(LEVEL_LABEL_KEYS[factor.level])}
                     </span>
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-muted">{factor.description}</p>
+                  <p className="mt-2 text-sm leading-6 text-muted">
+                    {t(factor.descKey, factor.descParams)}
+                    {factor.descExtraKey ? ` ${t(factor.descExtraKey, factor.descExtraParams)}` : ""}
+                  </p>
                   <div className="mt-3 flex items-start gap-2 rounded-md bg-white/60 px-3 py-2">
                     <span className="mt-0.5 text-amber">💡</span>
-                    <p className="text-xs font-bold leading-5 text-ink">{factor.tip}</p>
+                    <p className="text-xs font-bold leading-5 text-ink">{t(factor.tipKey, factor.tipParams)}</p>
                   </div>
                 </div>
               );

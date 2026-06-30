@@ -11,7 +11,7 @@ export default async function BudgetsPage() {
   }
 
   return (
-    <AppShell active="budgets" user={{ name: user.name, email: user.email }}>
+    <AppShell active="budgets" user={{ name: user.name, email: user.email, image: user.imageUrl }}>
       <BudgetPlanner />
     </AppShell>
   );

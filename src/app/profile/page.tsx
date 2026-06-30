@@ -12,7 +12,7 @@ export default async function ProfilePage() {
   }
 
   return (
-    <AppShell active="profile" user={{ name: user.name, email: user.email }}>
+    <AppShell active="profile" user={{ name: user.name, email: user.email, image: user.imageUrl }}>
       <section className="panel grid gap-8 p-6 shadow-premium lg:grid-cols-[0.7fr_1.3fr]">
         <aside className="rounded-2xl border border-hairline bg-surface p-5 text-ink">
           <div className="grid h-16 w-16 place-items-center rounded-full bg-rausch/10 text-rausch">

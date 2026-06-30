@@ -11,7 +11,7 @@ export default async function PredictionsPage() {
   }
 
   return (
-    <AppShell active="predictions" user={{ name: user.name, email: user.email }}>
+    <AppShell active="predictions" user={{ name: user.name, email: user.email, image: user.imageUrl }}>
       <FinancialPredictions />
     </AppShell>
   );

@@ -15,6 +15,15 @@ export const loginSchema = z.object({
   password: z.string().min(1)
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email()
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1),
+  password: z.string().min(8).max(128)
+});
+
 export const profileSchema = z.object({
   name: z.string().min(2).max(80),
   monthlyIncome: z.coerce.number().min(0),
@@ -54,6 +63,16 @@ export const budgetSchema = z.object({
   endsAt: z.coerce.date().optional().nullable(),
   alertAtPct: z.coerce.number().int().min(1).max(100).default(80),
   isActive: z.boolean().default(true)
+});
+
+export const subscriptionSchema = z.object({
+  name: z.string().min(1).max(140),
+  amount: z.coerce.number().positive(),
+  currency: z.string().length(3).default("USD"),
+  frequency: z.enum(["monthly", "quarterly", "yearly"]).default("monthly"),
+  status: z.enum(["active", "cancelled"]).default("active"),
+  nextPaymentAt: z.coerce.date().optional().nullable(),
+  note: z.string().max(500).optional().nullable()
 });
 
 export const financialGoalSchema = z.object({

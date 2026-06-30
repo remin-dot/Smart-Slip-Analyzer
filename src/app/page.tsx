@@ -36,7 +36,7 @@ export default function Home() {
               Scan slips, protect your data, and understand your money.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">
-              Smart Slip Analyzer now includes credential login, Google OAuth readiness,
+              Smart Slip Analyzer now includes credential login,
               profile preferences, and protected routes for personal financial data.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
