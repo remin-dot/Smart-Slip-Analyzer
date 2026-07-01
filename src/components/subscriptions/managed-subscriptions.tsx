@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { useToast } from "@/components/toast";
 
 type Subscription = {
   id: string;
@@ -39,6 +40,7 @@ const FREQ_COLOR: Record<string, string> = { monthly: "#087f7a", quarterly: "#28
 
 export function ManagedSubscriptions() {
   const { t } = useI18n();
+  const toast = useToast();
   const [items, setItems] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -97,10 +99,12 @@ export function ManagedSubscriptions() {
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error();
+      toast(t("toast.saved"));
       close();
       load();
     } catch {
       setError(t("msub.saveError"));
+      toast(t("msub.saveError"), "error");
     } finally {
       setSaving(false);
     }
@@ -110,9 +114,11 @@ export function ManagedSubscriptions() {
     try {
       const res = await fetch(`/api/subscriptions/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
+      toast(t("toast.deleted"));
       load();
     } catch {
       setError(t("msub.deleteError"));
+      toast(t("msub.deleteError"), "error");
     }
   };
 

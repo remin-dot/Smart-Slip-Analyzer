@@ -29,7 +29,10 @@ export const profileSchema = z.object({
   monthlyIncome: z.coerce.number().min(0),
   savingGoal: z.coerce.number().min(0),
   financialPreference: z.enum(["CONSERVATIVE", "BALANCED", "GROWTH"]),
-  currency: z.string().length(3)
+  currency: z.string().length(3),
+  // Small resized data URL (or remote URL); capped so the DB text column can't
+  // be abused. null clears the picture back to the initials default.
+  imageUrl: z.string().max(600_000).nullable().optional()
 });
 
 export const categorySchema = z.object({
@@ -50,7 +53,9 @@ export const transactionSchema = z.object({
   slipImageUrl: z.string().url().optional().nullable(),
   slipRawText: z.string().optional().nullable(),
   aiConfidence: z.number().min(0).max(1).optional().nullable(),
-  aiMetadata: z.record(z.unknown()).optional().nullable()
+  aiMetadata: z.record(z.unknown()).optional().nullable(),
+  isFavorite: z.boolean().optional(),
+  tags: z.array(z.string().min(1).max(30)).max(12).optional()
 });
 
 export const budgetSchema = z.object({

@@ -1,3 +1,8 @@
+// Up-to-two-letter initials for avatar fallbacks.
+export function initials(name: string): string {
+  return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "?";
+}
+
 // Currency helpers. Intl.NumberFormat does all the symbol/locale work — no FX
 // conversion: a personal-finance app stores amounts in the user's own currency.
 

@@ -48,6 +48,25 @@ input[type="number"] {
   appearance: textfield;
 }
 
+/* Success pop — a small scale-in with a gentle overshoot for confirmations. */
+@keyframes pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.animate-pop {
+  animation: pop 0.4s ease-out both;
+}
+
+/* OCR scan-line — a bar that sweeps down the receipt while it's being read. */
+@keyframes scanY {
+  0% { top: -12%; }
+  100% { top: 112%; }
+}
+.animate-scanY {
+  animation: scanY 1.5s ease-in-out infinite;
+}
+
 /* Selects: replace the browser's chunky native arrow (Safari shows the same
    ⇕ stepper as number inputs) with one clean, consistent chevron. */
 select {
@@ -64,6 +83,50 @@ select {
 select[class] {
   padding-right: 2.25rem;
 }
+
+/* ------------------------------------------------------------------ *
+ * Dark mode. The app hardcodes bg-white / slate-* / semantic tokens in
+ * ~200 places, so instead of touching every component we remap those
+ * utility classes under `.dark`. `.dark .x` (0,2,0) outranks the plain
+ * utility (0,1,0), so no !important is needed.
+ * ponytail: known shortcut — accent colors (rausch/mint/amber/coral/ocean)
+ * stay fixed since they read well on dark; opacity variants like bg-white/60
+ * aren't remapped (edge cases, acceptable).
+ * ------------------------------------------------------------------ */
+html.dark {
+  color-scheme: dark;
+}
+.dark body {
+  background: #0d1117;
+  color: #e6edf3;
+}
+.dark .bg-paper { background-color: #0d1117; }
+.dark .bg-white { background-color: #161b22; }
+.dark .bg-surface,
+.dark .bg-slate-50 { background-color: #1c2129; }
+.dark .bg-surface-strong,
+.dark .bg-slate-100 { background-color: #232a33; }
+.dark .bg-slate-200 { background-color: #2b333d; }
+.dark .bg-slate-50\/60,
+.dark .bg-slate-50\/50 { background-color: rgba(255, 255, 255, 0.03); }
+
+.dark .text-ink { color: #e6edf3; }
+.dark .text-body { color: #c9d1d9; }
+.dark .text-muted { color: #9aa4b0; }
+.dark .text-slate-300 { color: #6e7681; }
+.dark .text-slate-400 { color: #8b949e; }
+
+.dark .border-slate-200,
+.dark .border-slate-100,
+.dark .border-hairline,
+.dark .border-hairline-soft { border-color: rgba(255, 255, 255, 0.09); }
+
+.dark .panel {
+  background-color: #161b22;
+  border-color: rgba(255, 255, 255, 0.09);
+}
+.dark .shadow-premium,
+.dark .shadow-sm { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05); }
 
 @layer components {
   /* Airbnb card: white surface, hairline border, soft 14px rounding, one shadow tier. */

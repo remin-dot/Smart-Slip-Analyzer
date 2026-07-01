@@ -22,9 +22,13 @@ export async function GET(request: NextRequest) {
   const to = searchParams.get("to") || undefined;
   const sortBy = searchParams.get("sortBy") as SortField | null;
   const sortDir = searchParams.get("sortDir") === "asc" ? "asc" : "desc";
+  const deleted = searchParams.get("deleted") === "true";
+  const favorite = searchParams.get("favorite") === "true";
 
-  const where: Prisma.TransactionWhereInput = { userId };
+  // Trash view shows only soft-deleted rows; every other view hides them.
+  const where: Prisma.TransactionWhereInput = { userId, deletedAt: deleted ? { not: null } : null };
 
+  if (favorite) where.isFavorite = true;
   if (categoryId) where.categoryId = categoryId;
   if (type) where.type = type as Prisma.EnumTransactionTypeFilter;
   if (source) where.source = source as Prisma.EnumTransactionSourceFilter;

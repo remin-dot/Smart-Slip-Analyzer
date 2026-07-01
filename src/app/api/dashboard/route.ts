@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
   const sixMonthsAgo = new Date(currentYear, currentMonth - 5, 1);
 
-  const [allTimeTx, monthlyTx, sixMonthTx, categoryTx, recentTx, user] = await Promise.all([
+  const [allTimeTx, monthlyTx, sixMonthTx, categoryTx, recentTx, user, scanStats] = await Promise.all([
     prisma.transaction.groupBy({
       by: ["type"],
       where: { userId },
@@ -52,7 +52,17 @@ export async function GET(request: NextRequest) {
       where: { id: userId },
       select: { monthlyIncome: true, savingGoal: true, currency: true },
     }),
+
+    // Receipts scanned + average OCR confidence.
+    prisma.transaction.aggregate({
+      where: { userId, source: "SLIP_SCAN" },
+      _count: true,
+      _avg: { aiConfidence: true },
+    }),
   ]);
+
+  const receiptsCount = scanStats._count;
+  const ocrAccuracy = scanStats._avg.aiConfidence != null ? Math.round(Number(scanStats._avg.aiConfidence) * 100) : null;
 
   // All-time totals
   const totalIncome = sumByType(allTimeTx, "INCOME");
@@ -145,6 +155,8 @@ export async function GET(request: NextRequest) {
       savingRate,
       txCount,
       monthTxCount,
+      receiptsCount,
+      ocrAccuracy,
       profileIncome: Number(user?.monthlyIncome ?? 0),
       profileSavingGoal: Number(user?.savingGoal ?? 0),
       currency: user?.currency ?? "USD",

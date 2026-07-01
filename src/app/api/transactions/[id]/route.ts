@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { apiError, parseJson, requireUserId } from "@/lib/api";
+import { apiError, requireUserId } from "@/lib/api";
 import { transactionSchema } from "@/lib/validators";
 
 type Params = {
@@ -31,11 +31,21 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     if (response) return response;
 
     const { id } = await params;
-    const data = await parseJson(request, transactionSchema.partial());
-    const transactionData: Prisma.TransactionUncheckedUpdateInput = {
-      ...data,
-      aiMetadata: data.aiMetadata ? (data.aiMetadata as Prisma.InputJsonValue) : undefined
-    };
+    const raw = await request.json();
+
+    // `{ restore: true }` brings a soft-deleted row back; otherwise it's a
+    // normal field update validated against the schema.
+    let transactionData: Prisma.TransactionUncheckedUpdateInput;
+    if (raw?.restore === true) {
+      transactionData = { deletedAt: null };
+    } else {
+      const data = transactionSchema.partial().parse(raw);
+      transactionData = {
+        ...data,
+        aiMetadata: data.aiMetadata ? (data.aiMetadata as Prisma.InputJsonValue) : undefined
+      };
+    }
+
     const transaction = await prisma.transaction.update({
       where: { id, userId },
       data: transactionData,
@@ -54,7 +64,14 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     if (response) return response;
 
     const { id } = await params;
-    await prisma.transaction.delete({ where: { id, userId } });
+    const hard = new URL(request.url).searchParams.get("hard") === "true";
+
+    if (hard) {
+      await prisma.transaction.delete({ where: { id, userId } });
+    } else {
+      // Soft delete: keep the row so it can be restored from Trash.
+      await prisma.transaction.update({ where: { id, userId }, data: { deletedAt: new Date() } });
+    }
 
     return NextResponse.json({ ok: true });
   } catch (error) {

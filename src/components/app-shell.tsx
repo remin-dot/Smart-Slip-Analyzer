@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowLeftRight,
   CircleDollarSign,
   FileScan,
   Flag,
@@ -22,12 +23,14 @@ import { useState } from "react";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { CurrencySwitcher } from "@/components/currency-switcher";
 import { LangSwitcher } from "@/components/lang-switcher";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { initials } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 
 export type PageKey =
   | "dashboard" | "scanner" | "transactions" | "budgets" | "goals"
   | "chat" | "purchase" | "subscriptions" | "predictions" | "wealth"
-  | "achievements" | "premium" | "profile";
+  | "achievements" | "premium" | "profile" | "compare";
 
 type NavItem = { key: PageKey; href: Route; Icon: typeof LayoutDashboard };
 
@@ -59,14 +62,11 @@ const NAV_GROUPS: { labelKey: string; items: NavItem[] }[] = [
     items: [
       { key: "chat", href: "/chat", Icon: MessageCircle },
       { key: "purchase", href: "/purchase", Icon: ShoppingCart },
+      { key: "compare", href: "/compare", Icon: ArrowLeftRight },
       { key: "achievements", href: "/achievements", Icon: Star },
     ],
   },
 ];
-
-function initials(name: string) {
-  return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "?";
-}
 
 export function AppShell({
   active,
@@ -166,6 +166,7 @@ export function AppShell({
         </nav>
 
         <div className="mt-auto grid gap-2">
+          <ThemeToggle />
           <LangSwitcher />
           <CurrencySwitcher />
           <div className={`rounded-2xl p-4 ${dark ? "border border-white/10 bg-white/5" : "border border-hairline bg-surface"}`}>

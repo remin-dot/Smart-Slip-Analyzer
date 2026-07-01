@@ -12,13 +12,16 @@ import {
   ChevronRight,
   Loader2,
   Pencil,
+  RotateCcw,
   Save,
   Search,
   Sparkles,
+  Star,
   Trash2,
   X,
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { useToast } from "@/components/toast";
 
 type Category = {
   id: string;
@@ -39,6 +42,8 @@ type Transaction = {
   aiConfidence: number | null;
   aiMetadata: Record<string, unknown> | null;
   category: Category | null;
+  isFavorite: boolean;
+  tags: string[];
 };
 
 type SortField = "occurredAt" | "amount" | "merchant";
@@ -55,6 +60,7 @@ const SOURCE_LABEL_KEYS: Record<string, string> = {
 
 export function TransactionList() {
   const { t } = useI18n();
+  const toast = useToast();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [total, setTotal] = useState(0);
@@ -69,6 +75,8 @@ export function TransactionList() {
   const [filterSource, setFilterSource] = useState("");
   const [filterFrom, setFilterFrom] = useState("");
   const [filterTo, setFilterTo] = useState("");
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const [showDeleted, setShowDeleted] = useState(false);
 
   // Sort
   const [sortBy, setSortBy] = useState<SortField>("occurredAt");
@@ -85,6 +93,8 @@ export function TransactionList() {
     occurredAt: string;
     categoryId: string;
     type: string;
+    tags: string;
+    description: string;
   } | null>(null);
 
   // Delete confirmation
@@ -102,7 +112,7 @@ export function TransactionList() {
   }, [search]);
 
   // Reset page on filter change
-  useEffect(() => { setPage(0); }, [debouncedSearch, filterCategory, filterType, filterSource, filterFrom, filterTo, sortBy, sortDir]);
+  useEffect(() => { setPage(0); }, [debouncedSearch, filterCategory, filterType, filterSource, filterFrom, filterTo, sortBy, sortDir, favoritesOnly, showDeleted]);
 
   // Fetch categories once
   useEffect(() => {
@@ -127,6 +137,8 @@ export function TransactionList() {
       if (filterSource) params.set("source", filterSource);
       if (filterFrom) params.set("from", filterFrom);
       if (filterTo) params.set("to", filterTo);
+      if (favoritesOnly) params.set("favorite", "true");
+      if (showDeleted) params.set("deleted", "true");
 
       const res = await fetch(`/api/transactions?${params}`);
       if (!res.ok) throw new Error("load");
@@ -138,7 +150,7 @@ export function TransactionList() {
     } finally {
       setLoading(false);
     }
-  }, [page, sortBy, sortDir, debouncedSearch, filterCategory, filterType, filterSource, filterFrom, filterTo, t]);
+  }, [page, sortBy, sortDir, debouncedSearch, filterCategory, filterType, filterSource, filterFrom, filterTo, favoritesOnly, showDeleted, t]);
 
   useEffect(() => { fetchTransactions(); }, [fetchTransactions]);
 
@@ -163,6 +175,8 @@ export function TransactionList() {
       occurredAt: tx.occurredAt.slice(0, 10),
       categoryId: tx.category?.id ?? "",
       type: tx.type,
+      tags: (tx.tags ?? []).join(", "),
+      description: tx.description ?? "",
     });
   };
 
@@ -179,6 +193,8 @@ export function TransactionList() {
         amount: Number(editForm.amount),
         occurredAt: new Date(editForm.occurredAt).toISOString(),
         type: editForm.type,
+        description: editForm.description.trim() || null,
+        tags: editForm.tags.split(",").map((s) => s.trim()).filter(Boolean),
       };
       if (editForm.categoryId) body.categoryId = editForm.categoryId;
       else body.categoryId = null;
@@ -196,10 +212,54 @@ export function TransactionList() {
     }
   };
 
-  // Delete
+  // Delete (soft)
   const confirmDelete = async (id: string) => {
     try {
       const res = await fetch(`/api/transactions/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("delete");
+      setDeletingId(null);
+      toast(t("toast.deleted"));
+      fetchTransactions();
+    } catch {
+      setError(t("tx.deleteError"));
+      toast(t("tx.deleteError"), "error");
+    }
+  };
+
+  const toggleFavorite = async (tx: Transaction) => {
+    // Optimistic flip so the star feels instant.
+    setTransactions((list) => list.map((x) => (x.id === tx.id ? { ...x, isFavorite: !x.isFavorite } : x)));
+    try {
+      const res = await fetch(`/api/transactions/${tx.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isFavorite: !tx.isFavorite }),
+      });
+      if (!res.ok) throw new Error("fav");
+    } catch {
+      setError(t("tx.saveError"));
+      fetchTransactions();
+    }
+  };
+
+  const restore = async (id: string) => {
+    try {
+      const res = await fetch(`/api/transactions/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ restore: true }),
+      });
+      if (!res.ok) throw new Error("restore");
+      toast(t("toast.restored"));
+      fetchTransactions();
+    } catch {
+      setError(t("tx.saveError"));
+    }
+  };
+
+  const hardDelete = async (id: string) => {
+    try {
+      const res = await fetch(`/api/transactions/${id}?hard=true`, { method: "DELETE" });
       if (!res.ok) throw new Error("delete");
       setDeletingId(null);
       fetchTransactions();
@@ -247,7 +307,7 @@ export function TransactionList() {
   };
 
   const uncategorizedCount = transactions.filter((tx) => !tx.category).length;
-  const hasFilters = debouncedSearch || filterCategory || filterType || filterSource || filterFrom || filterTo;
+  const hasFilters = debouncedSearch || filterCategory || filterType || filterSource || filterFrom || filterTo || favoritesOnly;
 
   const clearFilters = () => {
     setSearch("");
@@ -257,10 +317,34 @@ export function TransactionList() {
     setFilterSource("");
     setFilterFrom("");
     setFilterTo("");
+    setFavoritesOnly(false);
   };
 
   return (
     <div className="grid gap-4">
+      {/* View toggles: favorites & trash */}
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setFavoritesOnly((v) => !v)}
+          disabled={showDeleted}
+          className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-bold transition-colors disabled:opacity-40 ${
+            favoritesOnly ? "border-amber bg-amber/10 text-amber" : "border-slate-200 bg-white text-muted hover:text-ink"
+          }`}
+        >
+          <Star size={15} className={favoritesOnly ? "fill-amber" : ""} /> {t("tx.favorites")}
+        </button>
+        <button
+          type="button"
+          onClick={() => { setShowDeleted((v) => !v); setFavoritesOnly(false); }}
+          className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-bold transition-colors ${
+            showDeleted ? "border-coral bg-coral/10 text-coral" : "border-slate-200 bg-white text-muted hover:text-ink"
+          }`}
+        >
+          <Trash2 size={15} /> {showDeleted ? t("tx.exitTrash") : t("tx.trash")}
+        </button>
+      </div>
+
       {/* Error banner */}
       {error && (
         <div className="flex items-center gap-3 rounded-lg bg-coral/10 px-4 py-3 text-sm text-coral">
@@ -416,13 +500,16 @@ export function TransactionList() {
                     <TableRow
                       key={tx.id}
                       tx={tx}
+                      trashed={showDeleted}
                       isDeleting={deletingId === tx.id}
                       isClassifying={classifyingId === tx.id}
                       onEdit={() => startEdit(tx)}
                       onDelete={() => setDeletingId(tx.id)}
-                      onConfirmDelete={() => confirmDelete(tx.id)}
+                      onConfirmDelete={() => (showDeleted ? hardDelete(tx.id) : confirmDelete(tx.id))}
                       onCancelDelete={() => setDeletingId(null)}
                       onClassify={() => classifySingle(tx.id)}
+                      onToggleFavorite={() => toggleFavorite(tx)}
+                      onRestore={() => restore(tx.id)}
                     />
                   )
                 )
@@ -528,6 +615,7 @@ function SortHeader({
 
 function TableRow({
   tx,
+  trashed,
   isDeleting,
   isClassifying,
   onEdit,
@@ -535,8 +623,11 @@ function TableRow({
   onConfirmDelete,
   onCancelDelete,
   onClassify,
+  onToggleFavorite,
+  onRestore,
 }: {
   tx: Transaction;
+  trashed: boolean;
   isDeleting: boolean;
   isClassifying: boolean;
   onEdit: () => void;
@@ -544,6 +635,8 @@ function TableRow({
   onConfirmDelete: () => void;
   onCancelDelete: () => void;
   onClassify: () => void;
+  onToggleFavorite: () => void;
+  onRestore: () => void;
 }) {
   const { t } = useI18n();
   const amount = Number(tx.amount);
@@ -566,9 +659,19 @@ function TableRow({
 
       {/* Merchant */}
       <td className="max-w-[240px] px-4 py-3.5">
-        <p className="truncate font-black text-ink">{tx.merchant}</p>
+        <p className="flex items-center gap-1.5 truncate font-black text-ink">
+          {tx.isFavorite && <Star size={13} className="shrink-0 fill-amber text-amber" />}
+          {tx.merchant}
+        </p>
         {tx.description && (
           <p className="mt-0.5 truncate text-xs text-muted">{tx.description}</p>
+        )}
+        {tx.tags?.length > 0 && (
+          <div className="mt-1 flex flex-wrap gap-1">
+            {tx.tags.map((tag) => (
+              <span key={tag} className="rounded-full bg-teal/10 px-2 py-0.5 text-[10px] font-black text-teal">#{tag}</span>
+            ))}
+          </div>
         )}
         {explanation && (
           <p className="mt-1 flex items-center gap-1 text-xs text-teal">
@@ -640,8 +743,35 @@ function TableRow({
               <X size={15} />
             </button>
           </span>
+        ) : trashed ? (
+          <span className="inline-flex items-center gap-1">
+            <button
+              className="rounded p-1.5 text-muted hover:bg-mint/10 hover:text-mint"
+              onClick={onRestore}
+              title={t("tx.restore")}
+              type="button"
+            >
+              <RotateCcw size={15} />
+            </button>
+            <button
+              className="rounded p-1.5 text-muted hover:bg-coral/10 hover:text-coral"
+              onClick={onDelete}
+              title={t("tx.deleteForever")}
+              type="button"
+            >
+              <Trash2 size={15} />
+            </button>
+          </span>
         ) : (
           <span className="inline-flex items-center gap-1">
+            <button
+              className={`rounded p-1.5 hover:bg-amber/10 ${tx.isFavorite ? "text-amber" : "text-muted hover:text-amber"}`}
+              onClick={onToggleFavorite}
+              title={t("tx.favorite")}
+              type="button"
+            >
+              <Star size={15} className={tx.isFavorite ? "fill-amber" : ""} />
+            </button>
             <button
               className="rounded p-1.5 text-muted hover:bg-slate-100 hover:text-ink"
               onClick={onEdit}
@@ -672,7 +802,7 @@ function EditRow({
   onSave,
   onCancel,
 }: {
-  form: { merchant: string; amount: string; occurredAt: string; categoryId: string; type: string };
+  form: { merchant: string; amount: string; occurredAt: string; categoryId: string; type: string; tags: string; description: string };
   categories: Category[];
   onChange: (f: typeof form) => void;
   onSave: () => void;
@@ -691,15 +821,31 @@ function EditRow({
         />
       </td>
 
-      {/* Merchant */}
+      {/* Merchant + notes + tags */}
       <td className="px-4 py-2">
-        <input
-          className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-sm font-semibold outline-none focus:border-teal"
-          onChange={(e) => onChange({ ...form, merchant: e.target.value })}
-          placeholder={t("tx.merchantName")}
-          type="text"
-          value={form.merchant}
-        />
+        <div className="grid gap-1.5">
+          <input
+            className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-sm font-semibold outline-none focus:border-teal"
+            onChange={(e) => onChange({ ...form, merchant: e.target.value })}
+            placeholder={t("tx.merchantName")}
+            type="text"
+            value={form.merchant}
+          />
+          <input
+            className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-xs outline-none focus:border-teal"
+            onChange={(e) => onChange({ ...form, description: e.target.value })}
+            placeholder={t("tx.notesPlaceholder")}
+            type="text"
+            value={form.description}
+          />
+          <input
+            className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-xs outline-none focus:border-teal"
+            onChange={(e) => onChange({ ...form, tags: e.target.value })}
+            placeholder={t("tx.tagsPlaceholder")}
+            type="text"
+            value={form.tags}
+          />
+        </div>
       </td>
 
       {/* Category */}

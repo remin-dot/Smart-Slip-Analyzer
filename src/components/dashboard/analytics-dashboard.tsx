@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import {
   ArrowDownRight,
@@ -14,9 +15,15 @@ import { formatCurrency } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { BarChart } from "./bar-chart";
 import { DonutChart } from "./donut-chart";
-import { HealthScoreCard } from "./health-score-card";
 import { InsightsPanel } from "./insights-panel";
 import { TrendChart } from "./trend-chart";
+
+// Health score fetches its own data + renders an SVG ring — code-split it so it
+// doesn't weigh down the dashboard's initial bundle.
+const HealthScoreCard = dynamic(() => import("./health-score-card").then((m) => m.HealthScoreCard), {
+  ssr: false,
+  loading: () => <div className="panel min-h-[200px] animate-pulse rounded-2xl bg-slate-100" />,
+});
 
 type DashboardData = {
   summary: {
@@ -29,6 +36,8 @@ type DashboardData = {
     savingRate: number;
     txCount: number;
     monthTxCount: number;
+    receiptsCount: number;
+    ocrAccuracy: number | null;
     profileIncome: number;
     profileSavingGoal: number;
     currency: string;
@@ -222,7 +231,9 @@ export function AnalyticsDashboard() {
       </article>
 
       {/* Stats footer */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <StatBox label={t("dash.totalReceipts")} value={String(s.receiptsCount)} />
+        <StatBox label={t("dash.ocrAccuracy")} value={s.ocrAccuracy != null ? `${s.ocrAccuracy}%` : "—"} />
         <StatBox label={t("dash.totalTransactions")} value={String(s.txCount)} />
         <StatBox label={t("dash.thisMonthCount")} value={String(s.monthTxCount)} />
         <StatBox label={t("dash.profileSavingGoal")} value={money(s.profileSavingGoal)} />
