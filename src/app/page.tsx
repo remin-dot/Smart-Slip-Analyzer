@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Bot, FileScan, LockKeyhole, WalletCards } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 
 const features = [
   { title: "Slip AI", detail: "Extract merchant, amount, date, and category from bank slips.", icon: FileScan },
@@ -13,7 +14,7 @@ export default function Home() {
       <section className="mx-auto grid min-h-screen w-full max-w-6xl content-center gap-10 px-5 py-10">
         <nav className="flex items-center justify-between">
           <Link className="inline-flex items-center gap-3 text-ink" href="/">
-            <span className="grid h-11 w-11 place-items-center rounded-lg bg-[#f5c25b] font-black text-[#102c3a]">S</span>
+            <BrandLogo size={44} />
             <span>
               <strong className="block leading-5">Smart Slip</strong>
               <small className="font-semibold text-muted">Analyzer</small>

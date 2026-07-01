@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ReactNode } from "react";
+import { BrandLogo } from "@/components/brand-logo";
 
 type AuthCardProps = {
   title: string;
@@ -14,7 +15,7 @@ export function AuthCard({ title, subtitle, footer, children }: AuthCardProps) {
       <section className="mx-auto grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[0.9fr_1.1fr]">
         <div>
           <Link className="inline-flex items-center gap-3 text-ink" href="/">
-            <span className="grid h-11 w-11 place-items-center rounded-lg bg-[#f5c25b] font-black text-[#102c3a]">S</span>
+            <BrandLogo size={44} />
             <span>
               <strong className="block leading-5">Smart Slip</strong>
               <small className="font-semibold text-muted">Analyzer</small>
