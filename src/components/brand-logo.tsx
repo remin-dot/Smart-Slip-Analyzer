@@ -5,7 +5,7 @@ export function BrandLogo({ size = 44, className }: { size?: number; className?:
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src="/logo.png"
-      alt="Smart Slip Analyzer"
+      alt="Slipora"
       width={size}
       height={size}
       className={className}

@@ -29,7 +29,7 @@ export function TransactionExport() {
       const blob = await res.blob();
       const file = new File([blob], "transactions.csv", { type: "text/csv" });
       if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: "Smart Slip Analyzer" });
+        await navigator.share({ files: [file], title: "Slipora" });
         return;
       }
     } catch {

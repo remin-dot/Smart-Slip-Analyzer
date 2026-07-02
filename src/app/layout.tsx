@@ -7,7 +7,7 @@ import { ToastProvider } from "@/components/toast";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "Smart Slip Analyzer",
+  title: "Slipora",
   description: "AI personal finance assistant for bank slip scanning and spending analytics."
 };
 

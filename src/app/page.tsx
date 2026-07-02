@@ -44,8 +44,8 @@ export default function Home() {
           <Link className="inline-flex items-center gap-3 text-ink" href="/">
             <BrandLogo size={44} />
             <span>
-              <strong className="block leading-5">Smart Slip</strong>
-              <small className="font-semibold text-muted">Analyzer</small>
+              <strong className="block leading-5">Slipora</strong>
+              <small className="font-semibold text-muted">Smart Slip Analyzer</small>
             </span>
           </Link>
           <div className="flex items-center gap-2 sm:gap-3">
@@ -68,7 +68,7 @@ export default function Home() {
               Turn bank slips into <span className="text-rausch">smarter</span> money decisions.
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-8 text-muted">
-              Snap a receipt and Smart Slip Analyzer reads it, categorizes it, and turns your
+              Snap a receipt and Slipora reads it, categorizes it, and turns your
               spending into clean charts, budgets, and gentle advice — no spreadsheets, no stress.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -188,9 +188,9 @@ export default function Home() {
         <footer className="flex flex-col items-center justify-between gap-4 border-t border-hairline py-8 text-sm text-muted sm:flex-row">
           <div className="flex items-center gap-2.5">
             <BrandLogo size={28} />
-            <span className="font-bold text-ink">Smart Slip Analyzer</span>
+            <span className="font-bold text-ink">Slipora</span>
           </div>
-          <p>© {new Date().getFullYear()} Smart Slip Analyzer. Made to make money feel less scary.</p>
+          <p>© {new Date().getFullYear()} Slipora. Made to make money feel less scary.</p>
         </footer>
       </div>
     </main>

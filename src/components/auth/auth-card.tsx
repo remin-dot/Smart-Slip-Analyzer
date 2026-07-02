@@ -17,8 +17,8 @@ export function AuthCard({ title, subtitle, footer, children }: AuthCardProps) {
           <Link className="inline-flex items-center gap-3 text-ink" href="/">
             <BrandLogo size={44} />
             <span>
-              <strong className="block leading-5">Smart Slip</strong>
-              <small className="font-semibold text-muted">Analyzer</small>
+              <strong className="block leading-5">Slipora</strong>
+              <small className="font-semibold text-muted">Smart Slip Analyzer</small>
             </span>
           </Link>
           <p className="eyebrow mt-12">Private finance workspace</p>
